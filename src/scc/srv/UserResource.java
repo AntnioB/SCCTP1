@@ -15,6 +15,8 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import scc.data.CosmosDBLayer;
+import scc.data.User;
+import scc.data.UserDAO;
 
 @Path("/user")
 public class UserResource {
@@ -23,8 +25,13 @@ public class UserResource {
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String upload(byte[] contents) {
-		return null;
+	public String createUser(User user) {
+        CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(new UserDAO(user));
+        int statusCode = res.getStatusCode();
+		if(statusCode>300)
+            throw new WebApplicationException(statusCode);
+        
+        return res.getItem().toString();
 	}
 
     @DELETE
