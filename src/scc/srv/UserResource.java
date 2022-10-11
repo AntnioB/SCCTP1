@@ -48,11 +48,7 @@ public class UserResource {
 
     @PUT
     @Path("/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
     public String updateUser(){
-        CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().;
-        int statusCode = res.getStatusCode();
         return null;
     }
 
