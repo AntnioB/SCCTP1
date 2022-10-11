@@ -2,6 +2,8 @@ package scc.data;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Represents a User, as returned to the clients
  */
@@ -11,7 +13,7 @@ public class User {
 	private String pwd;
 	private String photoId;
 	private String[] channelIds;
-	public User(String id, String name, String pwd, String photoId, String[] channelIds) {
+	public User(@JsonProperty("id") String id,@JsonProperty("name") String name,@JsonProperty("pwd") String pwd,@JsonProperty("photoId") String photoId,@JsonProperty("channelIds") String[] channelIds) {
 		super();
 		this.id = id;
 		this.name = name;

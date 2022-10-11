@@ -55,7 +55,7 @@ public class MediaResource {
 	public String upload(byte[] contents) {
 		String key = Hash.of(contents);
 		BlobClient blob = getContainerClient().getBlobClient(key);
-		blob.upload(BinaryData.fromBytes(contents));
+		blob.upload(BinaryData.fromBytes(contents),true);
 		return key;
 	}
 

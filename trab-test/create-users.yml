@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc-backend-58152.azurewebsites.net/'
+  target: 'https://scc-backend-58152.azurewebsites.net/rest'
   plugins:
     metrics-by-endpoint: {}
   processor: "./test-utils.js"

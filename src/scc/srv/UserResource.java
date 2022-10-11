@@ -1,5 +1,7 @@
 package scc.srv;
 
+import java.util.Iterator;
+
 import javax.ws.rs.WebApplicationException;
 
 import com.azure.cosmos.models.CosmosItemResponse;
@@ -25,11 +27,12 @@ public class UserResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String createUser(User user) {
+        if(CosmosDBLayer.getInstance().getUsers().stream().anyMatch(user2 -> user2.getId().equals(user.getId())))
+            throw new WebApplicationException(418);
         CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(new UserDAO(user));
         int statusCode = res.getStatusCode();
 		if(statusCode>300)
             throw new WebApplicationException(statusCode);
-        
         return res.getItem().toString();
 	}
 
@@ -42,13 +45,26 @@ public class UserResource {
         int resStatus = res.getStatusCode();
         if(resStatus>300)
             throw new WebApplicationException(resStatus);
-        return res.getItem().toString();
+        return String.valueOf(res.getStatusCode());
     }
 
     @PUT
     @Path("/{id}")
     public String updateUser(){
         return null;
+    }
+
+    @GET
+    @Path("/list")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String listUsers(){
+        CosmosDBLayer db = CosmosDBLayer.getInstance();
+        StringBuilder res = new StringBuilder();
+        Iterator<UserDAO> ite = db.getUsers().iterator();
+        while(ite.hasNext()){
+            res.append(ite.next().getId()+"\n");
+        }
+        return res.toString();
     }
 
 }
