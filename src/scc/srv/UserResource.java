@@ -22,7 +22,6 @@ import scc.data.UserDAO;
 public class UserResource {
 
     @POST
-	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String createUser(User user) {
