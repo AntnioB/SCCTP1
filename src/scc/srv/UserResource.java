@@ -5,6 +5,9 @@ import java.util.Iterator;
 import javax.ws.rs.WebApplicationException;
 
 import com.azure.cosmos.models.CosmosItemResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -26,14 +29,19 @@ public class UserResource {
     @POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String createUser(User user) {
-        if(CosmosDBLayer.getInstance().getUsers().stream().anyMatch(user2 -> user2.getId().equals(user.getId())))
-            throw new WebApplicationException(418);
+	public String createUser(User user) throws JsonProcessingException {
+        /**Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(user.getId()).iterator();
+        while(ite.hasNext()){
+            if(ite.next().getId().equals(user.getId()))
+                throw new WebApplicationException(403);
+        }*/
         CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(new UserDAO(user));
         int statusCode = res.getStatusCode();
 		if(statusCode>300)
             throw new WebApplicationException(statusCode);
-        return res.getItem().toString();
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(res.getItem().toUser());
+        return json;
 	}
 
     @DELETE
