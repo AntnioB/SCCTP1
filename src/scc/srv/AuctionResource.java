@@ -1,6 +1,5 @@
 package scc.srv;
 
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,17 +12,15 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import scc.data.CosmosDBLayer;
-import scc.data.User;
-import scc.data.UserDAO;
-import scc.utils.Hash;
+import scc.data.Auction;
+import scc.data.AuctionDAO;
+import scc.data.CosmosDBAuctionLayer;
 
 @Path("/auction")
 public class AuctionResource {
@@ -31,7 +28,7 @@ public class AuctionResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createAuction(User user) throws JsonProcessingException {
+    public String createAuction(Auction auction) throws JsonProcessingException {
         /**
          * Iterator<UserDAO> ite =
          * CosmosDBLayer.getInstance().getUserById(user.getId()).iterator();
@@ -40,15 +37,14 @@ public class AuctionResource {
          * throw new WebApplicationException(403);
          * }
          */
-        UserDAO tmp = new UserDAO(user);
+        AuctionDAO tmp = new AuctionDAO(auction);
         tmp.setId(UUID.randomUUID().toString());
-        tmp.setPwd(Hash.of(user.getPwd()));
-        CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(tmp);
+        CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(tmp);
         int statusCode = res.getStatusCode();
         if (statusCode > 300)
             throw new WebApplicationException(statusCode);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(res.getItem().toUser());
+        String json = ow.writeValueAsString(res.getItem().toAuction());
         return json;
     }
 
@@ -56,8 +52,8 @@ public class AuctionResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public String deleteAuction(@PathParam("id") String id) {
-        CosmosDBLayer db = CosmosDBLayer.getInstance();
-        CosmosItemResponse<Object> res = db.delUserById(id);
+        CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
+        CosmosItemResponse<Object> res = db.delAuctionById(id);
         int resStatus = res.getStatusCode();
         if (resStatus > 300)
             throw new WebApplicationException(resStatus);
@@ -68,35 +64,22 @@ public class AuctionResource {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String updateAuction(User user) throws JsonProcessingException {
-        CosmosDBLayer db = CosmosDBLayer.getInstance();
-        if (!userExists(user.getId(), db))
+    public String updateAuction(Auction auction) throws JsonProcessingException {
+        CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
+        if (!auctionExists(auction.getId(), db))
             throw new WebApplicationException(409);
-        CosmosItemResponse<UserDAO> res = db.updateUser(new UserDAO(user));
+        CosmosItemResponse<AuctionDAO> res = db.updateAuction(new AuctionDAO(auction));
         int statusCode = res.getStatusCode();
         if (statusCode > 300)
             throw new WebApplicationException(statusCode);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(res.getItem().toUser());
+        String json = ow.writeValueAsString(res.getItem().toAuction());
         return json;
     }
 
-    @GET
-    @Path("/list")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String listUsers() {
-        CosmosDBLayer db = CosmosDBLayer.getInstance();
-        StringBuilder res = new StringBuilder();
-        Iterator<UserDAO> ite = db.getUsers().iterator();
-        while (ite.hasNext()) {
-            res.append(ite.next().getId() + "\n");
-        }
-        return res.toString();
-    }
-
-    private boolean userExists(String id, CosmosDBLayer db) {
-        Optional<UserDAO> res = db.getUsers().stream()
-                .filter(user -> user.getId().equals(id)).findFirst();
+    private boolean auctionExists(String id, CosmosDBAuctionLayer db) {
+        Optional<AuctionDAO> res = db.getAuctions().stream()
+                .filter(auction -> auction.getId().equals(id)).findFirst();
         return res.isPresent();
     }
 
