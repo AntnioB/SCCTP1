@@ -3,11 +3,8 @@ package scc.srv;
 import scc.utils.Hash;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -18,7 +15,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;

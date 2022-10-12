@@ -1,6 +1,8 @@
 package scc.srv;
 
 import java.util.Iterator;
+import java.util.Optional;
+import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -12,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -22,57 +23,93 @@ import jakarta.ws.rs.core.MediaType;
 import scc.data.CosmosDBLayer;
 import scc.data.User;
 import scc.data.UserDAO;
+import scc.utils.Hash;
 
 @Path("/user")
 public class UserResource {
 
     @POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public String createUser(User user) throws JsonProcessingException {
-        /**Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(user.getId()).iterator();
-        while(ite.hasNext()){
-            if(ite.next().getId().equals(user.getId()))
-                throw new WebApplicationException(403);
-        }*/
-        CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(new UserDAO(user));
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String createUser(User user) throws JsonProcessingException {
+        /**
+         * Iterator<UserDAO> ite =
+         * CosmosDBLayer.getInstance().getUserById(user.getId()).iterator();
+         * while(ite.hasNext()){
+         * if(ite.next().getId().equals(user.getId()))
+         * throw new WebApplicationException(403);
+         * }
+         */
+        UserDAO tmp = new UserDAO(user);
+        tmp.setId(UUID.randomUUID().toString());
+        tmp.setPwd(Hash.of(user.getPwd()));
+        CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(tmp);
         int statusCode = res.getStatusCode();
-		if(statusCode>300)
+        if (statusCode > 300)
             throw new WebApplicationException(statusCode);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(res.getItem().toUser());
         return json;
-	}
+    }
 
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String deleteUser(@PathParam("id") String id){
+    public String deleteUser(@PathParam("id") String id) {
         CosmosDBLayer db = CosmosDBLayer.getInstance();
         CosmosItemResponse<Object> res = db.delUserById(id);
         int resStatus = res.getStatusCode();
-        if(resStatus>300)
+        if (resStatus > 300)
             throw new WebApplicationException(resStatus);
         return String.valueOf(res.getStatusCode());
     }
 
     @PUT
     @Path("/{id}")
-    public String updateUser(){
-        return null;
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String updateUser(User user) throws JsonProcessingException {
+        CosmosDBLayer db = CosmosDBLayer.getInstance();
+        if(!userExists(user.getId(), db))
+            throw new WebApplicationException(409);
+        CosmosItemResponse<UserDAO> res = db.updateUser(new UserDAO(user));
+        int statusCode = res.getStatusCode();
+        if (statusCode > 300)
+            throw new WebApplicationException(statusCode);
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(res.getItem().toUser());
+        return json;
     }
 
     @GET
     @Path("/list")
     @Produces(MediaType.TEXT_PLAIN)
-    public String listUsers(){
+    public String listUsers() {
         CosmosDBLayer db = CosmosDBLayer.getInstance();
         StringBuilder res = new StringBuilder();
         Iterator<UserDAO> ite = db.getUsers().iterator();
-        while(ite.hasNext()){
-            res.append(ite.next().getId()+"\n");
+        while (ite.hasNext()) {
+            res.append(ite.next().getId() + "\n");
         }
         return res.toString();
+    }
+
+    @DELETE
+    @Path("/delete")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String deleteAll() {
+        CosmosDBLayer db = CosmosDBLayer.getInstance();
+        Iterator<UserDAO> ite = db.getUsers().iterator();
+        while (ite.hasNext()) {
+            db.delUser(ite.next());
+        }
+        return "200";
+    }
+
+    private boolean userExists(String id, CosmosDBLayer db) {
+        Optional<UserDAO> res = db.getUsers().stream()
+                .filter(user -> user.getId().equals(id)).findFirst();
+        return res.isPresent();
     }
 
 }
