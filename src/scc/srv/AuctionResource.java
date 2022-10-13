@@ -1,5 +1,6 @@
 package scc.srv;
 
+import java.util.Calendar;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,6 +10,8 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.deser.std.DateDeserializers.CalendarDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -43,7 +46,12 @@ public class AuctionResource {
         int statusCode = res.getStatusCode();
         if (statusCode > 300)
             throw new WebApplicationException(statusCode);
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Calendar.class, new CalendarDeserializer());
+        mapper.registerModule(module);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+
         String json = ow.writeValueAsString(res.getItem().toAuction());
         return json;
     }
