@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -83,6 +84,19 @@ public class AuctionResource {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(res.getItem().toAuction());
         return json;
+    }
+
+    @GET
+    @Path("/list")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String listAuctions() {
+        CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
+        StringBuilder res = new StringBuilder();
+        Iterator<AuctionDAO> ite = db.getAuctions().iterator();
+        while (ite.hasNext()) {
+            res.append(ite.next().getTitle() + "\n");
+        }
+        return res.toString();
     }
 
     private boolean auctionExists(String id, CosmosDBAuctionLayer db) {

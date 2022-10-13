@@ -3,6 +3,10 @@ package scc.data;
 import java.util.Calendar;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.DateDeserializers.CalendarDeserializer;
+import com.fasterxml.jackson.databind.ser.std.CalendarSerializer;
 
 /**
  * Represents an Auction, as returned to the clients
@@ -10,6 +14,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Auction {
     private String id, title, description, photoId;
     private User owner;
+
+    @JsonSerialize(using = CalendarSerializer.class)
+    @JsonDeserialize(using = CalendarDeserializer.class)
     private Calendar endTime;
 
     public Auction(@JsonProperty("id") String id, @JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
