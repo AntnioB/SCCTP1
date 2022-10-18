@@ -1,6 +1,7 @@
 package scc.srv;
 
-import java.util.Calendar;
+import java.time.format.DateTimeFormatter;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,8 +11,7 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.deser.std.DateDeserializers.CalendarDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -41,17 +41,17 @@ public class AuctionResource {
          * throw new WebApplicationException(403);
          * }
          */
+
+        ObjectMapper om = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
+        ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
+
         AuctionDAO tmp = new AuctionDAO(auction);
         tmp.setId(UUID.randomUUID().toString());
         CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(tmp);
         int statusCode = res.getStatusCode();
         if (statusCode > 300)
             throw new WebApplicationException(statusCode);
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(Calendar.class, new CalendarDeserializer());
-        mapper.registerModule(module);
-        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 
         String json = ow.writeValueAsString(res.getItem().toAuction());
         return json;
@@ -94,7 +94,7 @@ public class AuctionResource {
         StringBuilder res = new StringBuilder();
         Iterator<AuctionDAO> ite = db.getAuctions().iterator();
         while (ite.hasNext()) {
-            res.append(ite.next().getTitle() + "\n");
+            res.append(ite.next().getEndTime().format(DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss Z")) + "\n");
         }
         return res.toString();
     }

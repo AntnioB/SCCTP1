@@ -13,7 +13,6 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
-import io.netty.util.internal.logging.Log4J2LoggerFactory;
 import scc.utils.AzureProperties;
 
 public class CosmosDBAuctionLayer {
