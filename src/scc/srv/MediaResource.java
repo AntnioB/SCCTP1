@@ -28,7 +28,7 @@ import com.azure.storage.blob.models.BlobItem;
 public class MediaResource {
 
 	// Get connection string in the storage access keys page
-	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=storageacc58152;AccountKey=ao0i8xETCd9hhLanF2T+5ee3vgjGUnhTTAMsleOH+cA4nO8FtJlq6PSg74XcBiyfHL6jAtibafsM+ASthOyZxQ==;EndpointSuffix=core.windows.net";
+	String storageConnectionString = "BlobStoreConnection=DefaultEndpointsProtocol=https;AccountName=sccstwesteurope58152;AccountKey=dTLHRViEyorNqXTsjDkopsU6fw1TfIXZTBcqeJjFI1gtnmpDEjF4P+5AxamW453yVodXMWUUdTzn+ASt90iXTw==;EndpointSuffix=core.windows.net";
 
 	private BlobContainerClient getContainerClient() {
 
