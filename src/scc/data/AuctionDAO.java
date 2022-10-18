@@ -2,6 +2,8 @@ package scc.data;
 
 import java.time.ZonedDateTime;
 
+import scc.utils.Status;
+
 /**
  * Represents an Auction, as stored in the Database
  */
@@ -15,13 +17,15 @@ public class AuctionDAO {
     private User owner;
 	private ZonedDateTime endTime;
 	private double minPrice;
+	private Bid winnerBid;
+	private Status status;
 
     public AuctionDAO(){
     }
     public AuctionDAO(Auction a){
-        this(a.getId(),a.getTitle(),a.getDescription(),a.getPhotoId(),a.getOwner(),a.getEndTime(), a.getMinPrice());
+        this(a.getId(),a.getTitle(),a.getDescription(),a.getPhotoId(),a.getOwner(),a.getEndTime(), a.getMinPrice(),a.getWinnerBid(), a.getStatus());
     }
-    public AuctionDAO(String id, String title, String description, String photoId, User owner, ZonedDateTime endTime, double minPrice){
+    public AuctionDAO(String id, String title, String description, String photoId, User owner, ZonedDateTime endTime, double minPrice, Bid winnerBid, Status status){
         super();
 		this.id = id;
 		this.title = title;
@@ -30,6 +34,8 @@ public class AuctionDAO {
 		this.owner = owner;
         this.endTime = endTime;
 		this.minPrice = minPrice;
+		this.winnerBid = winnerBid;
+		this.status = status;
     }
 
     public String get_rid() {
@@ -77,6 +83,22 @@ public class AuctionDAO {
     public ZonedDateTime getEndTime(){
         return endTime;
     }
+
+	public Status getStatus(){
+		return status;
+	}
+
+	public void setStatus(Status status){
+		this.status = status;
+	}
+
+	public Bid getWinnerBid(){
+		return winnerBid;
+	}
+
+	public void setWinnerBid(Bid winnerBid){
+		this.winnerBid = winnerBid;
+	}
 
     public Auction toAuction(){
         return new Auction(id, title, photoId, description, owner, endTime, minPrice);

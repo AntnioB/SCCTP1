@@ -35,7 +35,6 @@ public class Auction {
 			status = Status.OPEN;
 		else status = Status.CLOSED;
 		winnerBid = null;
-		
     }
 
     public String getId() {
