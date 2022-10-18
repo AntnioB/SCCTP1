@@ -2,15 +2,16 @@ package scc.cache;
 
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import scc.utils.AzureProperties;
 
 public class RedisCache {
-	private static final String RedisHostname = "scc2223cache58152.redis.cache.windows.net";
-	private static final String RedisKey = "rojLUax2SrD7XW4Z72tTojSq1PlD7gPg9AzCaLdSCFQ=";
-	
+	private static final String RedisHostname = AzureProperties.getProperties().getProperty(AzureProperties.REDIS_URL);
+	private static final String RedisKey = AzureProperties.getProperties().getProperty(AzureProperties.REDIS_KEY);
+
 	private static JedisPool instance;
-	
+
 	public synchronized static JedisPool getCachePool() {
-		if( instance != null)
+		if (instance != null)
 			return instance;
 		final JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxTotal(128);
@@ -23,6 +24,6 @@ public class RedisCache {
 		poolConfig.setBlockWhenExhausted(true);
 		instance = new JedisPool(poolConfig, RedisHostname, 6380, 1000, RedisKey, true);
 		return instance;
-		
+
 	}
 }

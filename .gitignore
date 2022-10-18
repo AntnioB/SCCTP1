@@ -1,4 +1,5 @@
 target/
 trab-test/images/
 trab-test/node_modules/
-pom.xml
+.xml
+src/scc/utils/azurekeys-westeurope.props

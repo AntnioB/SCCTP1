@@ -1,5 +1,6 @@
 package scc.srv;
 
+import scc.utils.AzureProperties;
 import scc.utils.Hash;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import com.azure.storage.blob.models.BlobItem;
 public class MediaResource {
 
 	// Get connection string in the storage access keys page
-	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=storageacc58152;AccountKey=ao0i8xETCd9hhLanF2T+5ee3vgjGUnhTTAMsleOH+cA4nO8FtJlq6PSg74XcBiyfHL6jAtibafsM+ASthOyZxQ==;EndpointSuffix=core.windows.net";
+	String storageConnectionString = AzureProperties.getProperties().getProperty(AzureProperties.BLOB_KEY);
 
 	private BlobContainerClient getContainerClient() {
 
@@ -51,7 +52,7 @@ public class MediaResource {
 	public String upload(byte[] contents) {
 		String key = Hash.of(contents);
 		BlobClient blob = getContainerClient().getBlobClient(key);
-		blob.upload(BinaryData.fromBytes(contents),true);
+		blob.upload(BinaryData.fromBytes(contents), true);
 		return key;
 	}
 
@@ -77,17 +78,17 @@ public class MediaResource {
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<String> list() {
-		
+
 		Iterator<BlobItem> it = getContainerClient().listBlobs().iterator();
 		List<String> res = new ArrayList<>();
-		
-		while(it.hasNext()){
+
+		while (it.hasNext()) {
 			res.add(it.next().getName());
 		}
-		
-		if(res.isEmpty())
+
+		if (res.isEmpty())
 			throw new NotFoundException();
-		
+
 		return res;
 	}
 }
