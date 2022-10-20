@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.ws.rs.WebApplicationException;
 
 import com.azure.cosmos.models.CosmosItemResponse;
+import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -20,6 +21,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import scc.data.AuctionDAO;
 import scc.data.Bid;
 import scc.data.BidDAO;
 import scc.data.CosmosDBBidLayer;
@@ -32,11 +34,13 @@ public class BidResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String createBid(Bid bid, @PathParam("id") String id) throws JsonProcessingException{
         bid.setId(UUID.randomUUID().toString());
-        CosmosItemResponse<BidDAO> res = CosmosDBBidLayer.getInstance().putBid(new BidDAO(bid));
+
+        CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
+        BidDAO highestBid = db.getHighestBid(id).iterator().next();
+        if(highestBid != null && bid.getAmount() <= highestBid.getAmount())
+            return "Mo' Money Beatch";
+        CosmosItemResponse<BidDAO> res = db.putBid(new BidDAO(bid));
         int statusCode = res.getStatusCode();
-
-        //TODO checkar se bid maior que ultimo bid
-
         if (statusCode > 300)
             throw new WebApplicationException(statusCode);
 
@@ -54,9 +58,33 @@ public class BidResource {
         BidDAO next;
         while (ite.hasNext()) {
             next=ite.next();
-            //if(next.getAuctionId().equals(id))
+            if(next.getAuctionId().equals(id))
                 res.append(next.toString()+ "\n");
         }
         return res.toString();
+    }
+
+    @DELETE
+    @Path("/delete")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String deleteAll() {
+        CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
+        Iterator<BidDAO> ite = db.getBids().iterator();
+        while (ite.hasNext()) {
+            db.delBid(ite.next());
+        }
+        return "200";
+    }
+
+    @GET
+    @Path("/highest")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getHighestBid(@PathParam("id") String id){
+        CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
+        Iterator<BidDAO> ite = db.getHighestBid(id).iterator();
+        while (ite.hasNext()) {
+            return ite.next().toString();
+        }
+        return "";
     }
 }

@@ -80,6 +80,18 @@ public class CosmosDBBidLayer {
 				new CosmosQueryRequestOptions(), BidDAO.class);
 	}
 
+	public CosmosPagedIterable<BidDAO> getBidByAuctionId(String id){
+		init();
+		return bids.queryItems("SELECT * FROM bids WHERE bids.auctionId=\"" + id + "\"",
+				new CosmosQueryRequestOptions(), BidDAO.class);
+	}
+
+	public CosmosPagedIterable<BidDAO> getHighestBid(String id){
+		init();
+		return bids.queryItems("SELECT TOP 1 * FROM bids WHERE bids.auctionId=\"" + id + "\" ORDER BY bids.amount DESC",
+				new CosmosQueryRequestOptions(),BidDAO.class);
+	}
+
 	public CosmosPagedIterable<BidDAO> getBids() {
 		init();
 		return bids.queryItems("SELECT * FROM bids ", new CosmosQueryRequestOptions(), BidDAO.class);

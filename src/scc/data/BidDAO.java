@@ -5,19 +5,19 @@ public class BidDAO {
 	private String _ts;
     private String auctionId;
     private String bidderId;
-    private double value;
+    private double amount;
     private String id;
 
     public BidDAO(){}
     public BidDAO(Bid b){
-        this(b.getId(),b.getAuctionId(), b.getBidderId(), b.getValue());
+        this(b.getId(),b.getAuctionId(), b.getBidderId(), b.getAmount());
     }
-    public BidDAO(String id,String auctionId, String bidderId, double value){
+    public BidDAO(String id,String auctionId, String bidderId, double amount){
         super();
         this.id = id;
         this.auctionId = auctionId;
         this.bidderId = bidderId;
-        this.value = value;
+        this.amount = amount;
     }
 
     public String get_rid() {
@@ -56,20 +56,20 @@ public class BidDAO {
     public void setBidderId(String bidderId){
         this.bidderId = bidderId;
     }
-    public double getValue(){
-        return value;
+    public double getAmount(){
+        return amount;
     }
 
-    public void setValue(double value){
-        this.value = value;
+    public void setAmount(double amount){
+        this.amount = amount;
     }
 
     public Bid toBid(){
-        return new Bid(id, auctionId, bidderId, value);
+        return new Bid(id, auctionId, bidderId, amount);
     }
 
     @Override
     public String toString(){
-        return "Bid [auction = "+auctionId+"\n bidder = "+bidderId+"\n value = "+ value +"]";
+        return "Bid [auction = "+auctionId+"\n bidder = "+bidderId+"\n amount = "+ amount +"]";
     }
 }

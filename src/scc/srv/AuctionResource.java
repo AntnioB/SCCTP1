@@ -1,5 +1,6 @@
 package scc.srv;
 
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.Optional;
@@ -45,10 +46,10 @@ public class AuctionResource {
         ObjectMapper om = new ObjectMapper()
                 .registerModule(new JavaTimeModule());
         ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
-
-        AuctionDAO tmp = new AuctionDAO(auction);
-        tmp.setId(UUID.randomUUID().toString());
-        CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(tmp);
+        auction.setId(UUID.randomUUID().toString());
+        if(auction.getEndTime().isBefore(ZonedDateTime.now()))
+            return "Prohibited Time";
+        CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(new AuctionDAO(auction));
         int statusCode = res.getStatusCode();
         if (statusCode > 300)
             throw new WebApplicationException(statusCode);

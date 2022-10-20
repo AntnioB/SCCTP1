@@ -3,15 +3,15 @@ package scc.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Bid {
-    private double value;
+    private double amount;
     private String id, auctionId, bidderId;
 
-    public Bid(@JsonProperty("id") String id, @JsonProperty("auctionId") String auctionId, @JsonProperty("bidderId") String bidderId,@JsonProperty("value") double value){
+    public Bid(@JsonProperty("id") String id, @JsonProperty("auctionId") String auctionId, @JsonProperty("bidderId") String bidderId,@JsonProperty("amount") double amount){
         super();
         this.id = id;
         this.auctionId = auctionId;
         this.bidderId = bidderId;
-        this.value = value;
+        this.amount = amount;
     }
 
     public String getId(){
@@ -38,17 +38,17 @@ public class Bid {
         this.bidderId = bidderId;
     }
 
-    public double getValue(){
-        return value;
+    public double getAmount(){
+        return amount;
     }
 
-    public void setValue(double value){
-        this.value = value;
+    public void setAmount(double amount){
+        this.amount = amount;
     }
 
     @Override
     public String toString(){
-        return "Bid [auction = "+auctionId+"\n bidder = "+bidderId+"\n value = "+ value +"]";
+        return "Bid [auction = "+auctionId+"\n bidder = "+bidderId+"\n amount = "+ amount +"]";
     }
 
 }
