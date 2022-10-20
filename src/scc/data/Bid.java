@@ -3,31 +3,39 @@ package scc.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Bid {
-    private Auction auction;
-    private User bidder;
     private double value;
+    private String id, auctionId, bidderId;
 
-    public Bid(@JsonProperty("auction") Auction auction, @JsonProperty("bidder") User bidder,@JsonProperty("value") double value){
+    public Bid(@JsonProperty("id") String id, @JsonProperty("auctionId") String auctionId, @JsonProperty("bidderId") String bidderId,@JsonProperty("value") double value){
         super();
-        this.auction = auction;
-        this.bidder = bidder;
+        this.id = id;
+        this.auctionId = auctionId;
+        this.bidderId = bidderId;
         this.value = value;
     }
 
-    public Auction getAuction(){
-        return auction;
+    public String getId(){
+        return id;
     }
 
-    public void setAuction(Auction auction){
-        this.auction = auction;
+    public void setId(String id){
+        this.id = id;
     }
 
-    public User getBidder(){
-        return bidder;
+    public String getAuctionId(){
+        return auctionId;
     }
 
-    public void setBidder(User bidder){
-        this.bidder = bidder;
+    public void setAuctionId(String auctionId){
+        this.auctionId = auctionId;
+    }
+
+    public String getBidderId(){
+        return bidderId;
+    }
+
+    public void setBidderId(String bidderId){
+        this.bidderId = bidderId;
     }
 
     public double getValue(){
@@ -40,7 +48,7 @@ public class Bid {
 
     @Override
     public String toString(){
-        return "Bid [auction = "+auction.toString()+"\n bidder = "+bidder.toString()+"\n value = "+ value +"]";
+        return "Bid [auction = "+auctionId+"\n bidder = "+bidderId+"\n value = "+ value +"]";
     }
 
 }

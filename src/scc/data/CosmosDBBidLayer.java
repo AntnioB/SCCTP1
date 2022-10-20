@@ -16,12 +16,9 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import scc.utils.AzureProperties;
 
 public class CosmosDBBidLayer {
-    private static final String CONNECTION_URL = AzureProperties.getProperties()
-			.getProperty(AzureProperties.COSMOSDB_URL);
-	private static final String DB_KEY = AzureProperties.getProperties().getProperty(AzureProperties.COSMOSDB_KEY);
-	private static final String DB_NAME = AzureProperties.getProperties()
-			.getProperty(AzureProperties.COSMOSDB_DATABASE);
-
+    private static final String CONNECTION_URL = "https://scc2358152.documents.azure.com:443/";
+	private static final String DB_KEY = "JWMuqWZDbMyaQsblMkKNYM546yh9E2pt6lbubC91xt0v83To5IMGByfZzSWmuGGNtGgYyTRx4KtByWNHdyKMWQ==";
+	private static final String DB_NAME = "scc23db58152";
 	private static CosmosDBBidLayer instance;
 
 	public static synchronized CosmosDBBidLayer getInstance() {

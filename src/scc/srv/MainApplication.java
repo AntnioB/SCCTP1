@@ -15,6 +15,7 @@ public class MainApplication extends Application
 		resources.add(MediaResource.class);
 		resources.add(UserResource.class);
 		resources.add(AuctionResource.class);
+		resources.add(BidResource.class);
 		singletons.add( new MediaResource());	
 	}
 

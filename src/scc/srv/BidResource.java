@@ -24,14 +24,14 @@ import scc.data.Bid;
 import scc.data.BidDAO;
 import scc.data.CosmosDBBidLayer;
 
-@Path("/auction/{id}")
+@Path("/auction/{id}/bid")
 public class BidResource {
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String createBid(Bid bid, @PathParam("id") String id) throws JsonProcessingException{
-
+        bid.setId(UUID.randomUUID().toString());
         CosmosItemResponse<BidDAO> res = CosmosDBBidLayer.getInstance().putBid(new BidDAO(bid));
         int statusCode = res.getStatusCode();
 
@@ -54,8 +54,8 @@ public class BidResource {
         BidDAO next;
         while (ite.hasNext()) {
             next=ite.next();
-            if(next.getAuction().getId().equals(id))
-                res.append(ite.toString() + "\n");
+            //if(next.getAuctionId().equals(id))
+                res.append(next.toString()+ "\n");
         }
         return res.toString();
     }

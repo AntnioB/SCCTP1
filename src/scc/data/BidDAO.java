@@ -3,18 +3,20 @@ package scc.data;
 public class BidDAO {
     private String _rid;
 	private String _ts;
-    private Auction auction;
-    private User bidder;
+    private String auctionId;
+    private String bidderId;
     private double value;
+    private String id;
 
     public BidDAO(){}
     public BidDAO(Bid b){
-        this(b.getAuction(), b.getBidder(), b.getValue());
+        this(b.getId(),b.getAuctionId(), b.getBidderId(), b.getValue());
     }
-    public BidDAO(Auction auction, User bidder, double value){
+    public BidDAO(String id,String auctionId, String bidderId, double value){
         super();
-        this.auction = auction;
-        this.bidder = bidder;
+        this.id = id;
+        this.auctionId = auctionId;
+        this.bidderId = bidderId;
         this.value = value;
     }
 
@@ -31,22 +33,29 @@ public class BidDAO {
 		this._ts = _ts;
 	}
 
-    public Auction getAuction(){
-        return auction;
+    public String getId(){
+        return id;
     }
 
-    public void setAuction(Auction auction){
-        this.auction = auction;
+    public void setId(String id){
+        this.id = id;
     }
 
-    public User getBidder(){
-        return bidder;
+    public String getAuctionId(){
+        return auctionId;
     }
 
-    public void setBidder(User bidder){
-        this.bidder = bidder;
+    public void setAuctionId(String auctionId){
+        this.auctionId = auctionId;
     }
 
+    public String getBidderId(){
+        return bidderId;
+    }
+
+    public void setBidderId(String bidderId){
+        this.bidderId = bidderId;
+    }
     public double getValue(){
         return value;
     }
@@ -56,11 +65,11 @@ public class BidDAO {
     }
 
     public Bid toBid(){
-        return new Bid(auction, bidder, value);
+        return new Bid(id, auctionId, bidderId, value);
     }
 
     @Override
     public String toString(){
-        return "Bid [auction = "+auction.toString()+"\n bidder = "+bidder.toString()+"\n value = "+ value +"]";
+        return "Bid [auction = "+auctionId+"\n bidder = "+bidderId+"\n value = "+ value +"]";
     }
 }
