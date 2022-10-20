@@ -14,27 +14,27 @@ public class AuctionDAO {
 	private String title;
 	private String description;
 	private String photoId;
-    private User owner;
+    private String ownerId;
 	private ZonedDateTime endTime;
 	private double minPrice;
-	private Bid winnerBid;
+	private String winnerBidId;
 	private Status status;
 
     public AuctionDAO(){
     }
     public AuctionDAO(Auction a){
-        this(a.getId(),a.getTitle(),a.getDescription(),a.getPhotoId(),a.getOwner(),a.getEndTime(), a.getMinPrice(),a.getWinnerBid(), a.getStatus());
+        this(a.getId(),a.getTitle(),a.getDescription(),a.getPhotoId(),a.getOwnerId(),a.getEndTime(), a.getMinPrice(),a.getWinnerBidId(), a.getStatus());
     }
-    public AuctionDAO(String id, String title, String description, String photoId, User owner, ZonedDateTime endTime, double minPrice, Bid winnerBid, Status status){
+    public AuctionDAO(String id, String title, String description, String photoId, String ownerId, ZonedDateTime endTime, double minPrice, String winnerBidId, Status status){
         super();
 		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.photoId = photoId;
-		this.owner = owner;
+		this.ownerId = ownerId;
         this.endTime = endTime;
 		this.minPrice = minPrice;
-		this.winnerBid = winnerBid;
+		this.winnerBidId = winnerBidId;
 		this.status = status;
     }
 
@@ -76,8 +76,8 @@ public class AuctionDAO {
 		this.photoId = photoId;
 	}
 
-    public User getOwner(){
-        return owner;
+    public String getOwnerId(){
+        return ownerId;
     }
 
     public ZonedDateTime getEndTime(){
@@ -92,21 +92,29 @@ public class AuctionDAO {
 		this.status = status;
 	}
 
-	public Bid getWinnerBid(){
-		return winnerBid;
+	public String getWinnerBidId(){
+		return winnerBidId;
 	}
 
-	public void setWinnerBid(Bid winnerBid){
-		this.winnerBid = winnerBid;
+	public void setWinnerBidId(String winnerBidId){
+		this.winnerBidId = winnerBidId;
+	}
+
+	public double getMinPrice(){
+		return minPrice;
+	}
+
+	public void setMinPrice(double minPrice){
+		this.minPrice = minPrice;
 	}
 
     public Auction toAuction(){
-        return new Auction(id, title, photoId, description, owner, endTime, minPrice);
+        return new Auction(id, title, photoId, description, ownerId, endTime, minPrice);
     }
 
     @Override
 	public String toString() {
-		return "UserDAO [_rid=" + _rid + ", _ts=" + _ts + ", id=" +  id + ", title=" + title + ", description=" + description + ", photoId=" + photoId + ", owner="
-				+ owner.getId()+ ", endTime="+ endTime.toString()+"]";
+		return "AuctionDAO [_rid=" + _rid + ", _ts=" + _ts + ", id=" +  id + ", title=" + title + ", description=" + description + ", photoId=" + photoId + ", owner="
+				+ ownerId+ ", endTime="+ endTime.toString()+ ", minPrice=" + minPrice + ", status= "+status.toString()+"winnerBid="+winnerBidId+"]";
 	}
 }

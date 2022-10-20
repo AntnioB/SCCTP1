@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +15,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -26,6 +26,8 @@ import jakarta.ws.rs.core.MediaType;
 import scc.data.Auction;
 import scc.data.AuctionDAO;
 import scc.data.CosmosDBAuctionLayer;
+import scc.data.CosmosDBLayer;
+import scc.data.UserDAO;
 
 @Path("/auction")
 public class AuctionResource {
@@ -34,19 +36,13 @@ public class AuctionResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String createAuction(Auction auction) throws JsonProcessingException {
-        /**
-         * Iterator<UserDAO> ite =
-         * CosmosDBLayer.getInstance().getUserById(user.getId()).iterator();
-         * while(ite.hasNext()){
-         * if(ite.next().getId().equals(user.getId()))
-         * throw new WebApplicationException(403);
-         * }
-         */
-
         ObjectMapper om = new ObjectMapper()
                 .registerModule(new JavaTimeModule());
         ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
         auction.setId(UUID.randomUUID().toString());
+        Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator();
+        if(!ite.hasNext())
+            throw new NotFoundException("User does not exist");
         if(auction.getEndTime().isBefore(ZonedDateTime.now()))
             return "Prohibited Time";
         CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(new AuctionDAO(auction));
@@ -77,7 +73,7 @@ public class AuctionResource {
     public String updateAuction(Auction auction) throws JsonProcessingException {
         CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
         if (!auctionExists(auction.getId(), db))
-            throw new WebApplicationException(409);
+            throw new WebApplicationException("Auction not found",404);
         CosmosItemResponse<AuctionDAO> res = db.updateAuction(new AuctionDAO(auction));
         int statusCode = res.getStatusCode();
         if (statusCode > 300)
@@ -95,7 +91,7 @@ public class AuctionResource {
         StringBuilder res = new StringBuilder();
         Iterator<AuctionDAO> ite = db.getAuctions().iterator();
         while (ite.hasNext()) {
-            res.append(ite.next().getEndTime().format(DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss Z")) + "\n");
+            res.append(ite.next().toString());
         }
         return res.toString();
     }

@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -25,6 +26,8 @@ import scc.data.AuctionDAO;
 import scc.data.Bid;
 import scc.data.BidDAO;
 import scc.data.CosmosDBBidLayer;
+import scc.data.CosmosDBLayer;
+import scc.data.UserDAO;
 
 @Path("/auction/{id}/bid")
 public class BidResource {
@@ -35,10 +38,14 @@ public class BidResource {
     public String createBid(Bid bid, @PathParam("id") String id) throws JsonProcessingException{
         bid.setId(UUID.randomUUID().toString());
 
+        Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(bid.getBidderId()).iterator();
+        if(!ite.hasNext())
+            throw new NotFoundException("User does not exist");
+
         CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
         BidDAO highestBid = db.getHighestBid(id).iterator().next();
         if(highestBid != null && bid.getAmount() <= highestBid.getAmount())
-            return "Mo' Money Beatch";
+            throw new WebApplicationException(403);
         CosmosItemResponse<BidDAO> res = db.putBid(new BidDAO(bid));
         int statusCode = res.getStatusCode();
         if (statusCode > 300)

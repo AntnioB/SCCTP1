@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;

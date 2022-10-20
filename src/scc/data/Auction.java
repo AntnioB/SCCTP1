@@ -13,28 +13,28 @@ import scc.utils.ZonedDateTimeDeserializer;
  */
 public class Auction {
     private String id, title, description, photoId;
-    private User owner;
+    private String ownerId;
 	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)
     private ZonedDateTime endTime;
 	private double minPrice;
 	private Status status;
-	private Bid winnerBid;
+	private String winnerBidId;
 
     public Auction(@JsonProperty("id") String id, @JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
-     @JsonProperty("description") String description, @JsonProperty("owner") User owner,
+     @JsonProperty("description") String description, @JsonProperty("ownerId") String ownerId,
      @JsonProperty("endTime") ZonedDateTime endTime, @JsonProperty("minPrice") double minPrice){
         super();
 		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.photoId = photoId;
-		this.owner = owner;
+		this.ownerId = ownerId;
         this.endTime = endTime;
 		this.minPrice = minPrice;
 		if(endTime.isAfter(ZonedDateTime.now()))
 			status = Status.OPEN;
 		else status = Status.CLOSED;
-		winnerBid = null;
+		winnerBidId = null;
     }
 
     public String getId() {
@@ -62,8 +62,8 @@ public class Auction {
 		this.photoId = photoId;
 	}
 
-    public User getOwner(){
-        return owner;
+    public String getOwnerId(){
+        return ownerId;
     }
 
     public ZonedDateTime getEndTime(){
@@ -78,17 +78,25 @@ public class Auction {
 		this.status = status;
 	}
 
+	public String getWinnerBidId(){
+		return winnerBidId;
+	}
+
+	public void setWinnerBidId(String winnerBidId){
+		this.winnerBidId = winnerBidId;
+	}
+
 	public double getMinPrice(){
 		return minPrice;
 	}
 
-	public Bid getWinnerBid(){
-		return winnerBid;
+	public void setMinPrice(double minPrice){
+		this.minPrice = minPrice;
 	}
 	
 	@Override
 	public String toString() {
 		return "Auction [id=" + id + ", title=" + title + ", description=" + description + ", photoId=" + photoId + ", owner="
-				+ owner.getId()+ ", endTime="+ endTime.toString()+"]";
+		+ ownerId+ ", endTime="+ endTime.toString()+ ", minPrice=" + minPrice + ", status= "+status.toString()+ "winnerBid="+winnerBidId+"]";
 	}
 }
