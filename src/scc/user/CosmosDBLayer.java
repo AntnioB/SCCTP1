@@ -1,4 +1,4 @@
-package scc.data;
+package scc.user;
 
 import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.CosmosClient;

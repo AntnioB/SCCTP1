@@ -1,37 +1,17 @@
-package scc.data;
+package scc.bid;
 
-public class BidDAO {
-    private String _rid;
-	private String _ts;
-    private String auctionId;
-    private String bidderId;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class Bid {
     private double amount;
-    private String id;
+    private String id, auctionId, bidderId;
 
-    public BidDAO(){}
-    public BidDAO(Bid b){
-        this(b.getId(),b.getAuctionId(), b.getBidderId(), b.getAmount());
-    }
-    public BidDAO(String id,String auctionId, String bidderId, double amount){
-        super();
+    public Bid(@JsonProperty("id") String id, @JsonProperty("auctionId") String auctionId, @JsonProperty("bidderId") String bidderId,@JsonProperty("amount") double amount){
         this.id = id;
         this.auctionId = auctionId;
         this.bidderId = bidderId;
         this.amount = amount;
     }
-
-    public String get_rid() {
-		return _rid;
-	}
-	public void set_rid(String _rid) {
-		this._rid = _rid;
-	}
-	public String get_ts() {
-		return _ts;
-	}
-	public void set_ts(String _ts) {
-		this._ts = _ts;
-	}
 
     public String getId(){
         return id;
@@ -56,6 +36,7 @@ public class BidDAO {
     public void setBidderId(String bidderId){
         this.bidderId = bidderId;
     }
+
     public double getAmount(){
         return amount;
     }
@@ -64,12 +45,9 @@ public class BidDAO {
         this.amount = amount;
     }
 
-    public Bid toBid(){
-        return new Bid(id, auctionId, bidderId, amount);
-    }
-
     @Override
     public String toString(){
         return "Bid [auction = "+auctionId+"\n bidder = "+bidderId+"\n amount = "+ amount +"]";
     }
+
 }

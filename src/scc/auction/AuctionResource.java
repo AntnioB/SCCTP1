@@ -1,7 +1,6 @@
-package scc.srv;
+package scc.auction;
 
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,11 +22,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import scc.data.Auction;
-import scc.data.AuctionDAO;
-import scc.data.CosmosDBAuctionLayer;
-import scc.data.CosmosDBLayer;
-import scc.data.UserDAO;
+import scc.user.CosmosDBLayer;
+import scc.user.UserDAO;
+
 
 @Path("/auction")
 public class AuctionResource {

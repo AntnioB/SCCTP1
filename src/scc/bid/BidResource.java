@@ -1,13 +1,11 @@
-package scc.srv;
+package scc.bid;
 
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.ws.rs.WebApplicationException;
 
 import com.azure.cosmos.models.CosmosItemResponse;
-import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -17,17 +15,12 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import scc.data.AuctionDAO;
-import scc.data.Bid;
-import scc.data.BidDAO;
-import scc.data.CosmosDBBidLayer;
-import scc.data.CosmosDBLayer;
-import scc.data.UserDAO;
+import scc.user.CosmosDBLayer;
+import scc.user.UserDAO;
 
 @Path("/auction/{id}/bid")
 public class BidResource {

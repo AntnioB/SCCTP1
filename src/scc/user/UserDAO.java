@@ -1,25 +1,43 @@
-package scc.data;
+package scc.user;
 
 import java.util.Arrays;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * Represents a User, as returned to the clients
+ * Represents a User, as stored in the database
  */
-public class User {
+public class UserDAO {
+	private String _rid;
+	private String _ts;
 	private String id;
 	private String name;
 	private String pwd;
 	private String photoId;
 	private String[] channelIds;
-	public User(@JsonProperty("id") String id,@JsonProperty("name") String name,@JsonProperty("pwd") String pwd,@JsonProperty("photoId") String photoId,@JsonProperty("channelIds") String[] channelIds) {
+
+	public UserDAO() {
+	}
+	public UserDAO( User u) {
+		this(u.getId(), u.getName(), u.getPwd(), u.getPhotoId(), u.getChannelIds());
+	}
+	public UserDAO(String id, String name, String pwd, String photoId, String[] channelIds) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.pwd = pwd;
 		this.photoId = photoId;
 		this.channelIds = channelIds;
+	}
+	public String get_rid() {
+		return _rid;
+	}
+	public void set_rid(String _rid) {
+		this._rid = _rid;
+	}
+	public String get_ts() {
+		return _ts;
+	}
+	public void set_ts(String _ts) {
+		this._ts = _ts;
 	}
 	public String getId() {
 		return id;
@@ -51,10 +69,13 @@ public class User {
 	public void setChannelIds(String[] channelIds) {
 		this.channelIds = channelIds;
 	}
+	public User toUser() {
+		return new User( id, name, pwd, photoId, channelIds == null ? null : Arrays.copyOf(channelIds,channelIds.length));
+	}
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", pwd=" + pwd + ", photoId=" + photoId + ", channelIds="
-				+ Arrays.toString(channelIds) + "]";
+		return "UserDAO [_rid=" + _rid + ", _ts=" + _ts + ", id=" + id + ", name=" + name + ", pwd=" + pwd
+				+ ", photoId=" + photoId + ", channelIds=" + Arrays.toString(channelIds) + "]";
 	}
 
 }

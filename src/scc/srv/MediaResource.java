@@ -1,6 +1,5 @@
 package scc.srv;
 
-import scc.utils.AzureProperties;
 import scc.utils.Hash;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package scc.data;
+package scc.bid;
 
 import java.util.logging.Logger;
 

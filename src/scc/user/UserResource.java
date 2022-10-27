@@ -1,4 +1,4 @@
-package scc.srv;
+package scc.user;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -20,9 +20,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import scc.data.CosmosDBLayer;
-import scc.data.User;
-import scc.data.UserDAO;
+
 import scc.utils.Hash;
 
 @Path("/user")

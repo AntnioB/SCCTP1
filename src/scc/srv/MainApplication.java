@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.ws.rs.core.Application;
+import scc.auction.AuctionResource;
+import scc.bid.BidResource;
+import scc.user.UserResource;
 
 public class MainApplication extends Application
 {

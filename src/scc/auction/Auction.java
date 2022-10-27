@@ -1,4 +1,4 @@
-package scc.data;
+package scc.auction;
 
 import java.time.ZonedDateTime;
 
@@ -23,7 +23,6 @@ public class Auction {
     public Auction(@JsonProperty("id") String id, @JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
      @JsonProperty("description") String description, @JsonProperty("ownerId") String ownerId,
      @JsonProperty("endTime") ZonedDateTime endTime, @JsonProperty("minPrice") double minPrice){
-        super();
 		this.id = id;
 		this.title = title;
 		this.description = description;
