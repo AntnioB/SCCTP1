@@ -10,14 +10,15 @@ public class Question {
     private String id, ownerId, auctionId, message;
     private List<Reply> replies;
 
-    public Question(@JsonProperty("id") String id, @JsonProperty("ownerId") String ownerId, @JsonProperty("auctionId") String auctionId, @JsonProperty("message") String message, @JsonProperty("replies") Reply[] replies){
+    public Question(@JsonProperty("id") String id, @JsonProperty("ownerId") String ownerId,
+            @JsonProperty("auctionId") String auctionId, @JsonProperty("message") String message,
+            @JsonProperty("replies") Reply[] replies) {
         this.id = id;
         this.auctionId = auctionId;
         this.message = message;
         this.ownerId = ownerId;
         this.replies = Arrays.asList(replies);
     }
-
 
     public String getId() {
         return this.id;
@@ -27,7 +28,6 @@ public class Question {
         this.id = id;
     }
 
-
     public String getAuctionId() {
         return this.auctionId;
     }
@@ -35,7 +35,6 @@ public class Question {
     public void setAuctionId(String auctionId) {
         this.auctionId = auctionId;
     }
-
 
     public String getMessage() {
         return this.message;
@@ -54,11 +53,16 @@ public class Question {
     }
 
     public Reply[] getReplies() {
-        return (Reply[]) this.replies.toArray();
+        return this.replies.toArray(new Reply[10]);
+    }
+
+    public void addReply(Reply reply) {
+        this.replies.add(reply);
     }
 
     @Override
     public String toString() {
-        return  "Question [id = "+ id +"\n ownerId = "+ ownerId +"\n auctionId = "+ auctionId +"\n message = "+ message +"\n replies = "+ replies.toString() +"]";
+        return "Question [id = " + id + "\n ownerId = " + ownerId + "\n auctionId = " + auctionId + "\n message = "
+                + message + "\n replies = " + replies.toString() + "]";
     }
 }

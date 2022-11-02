@@ -14,7 +14,7 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import scc.utils.AzureProperties;
 
 public class CosmosDBQuestionLayer {
-    private static final String CONNECTION_URL = "https://scc2358152.documents.azure.com:443/";
+	private static final String CONNECTION_URL = "https://scc2358152.documents.azure.com:443/";
 	private static final String DB_KEY = "JWMuqWZDbMyaQsblMkKNYM546yh9E2pt6lbubC91xt0v83To5IMGByfZzSWmuGGNtGgYyTRx4KtByWNHdyKMWQ==";
 	private static final String DB_NAME = "scc23db58152";
 
@@ -51,30 +51,37 @@ public class CosmosDBQuestionLayer {
 		if (db != null)
 			return;
 		db = client.getDatabase(DB_NAME);
-        if (AzureProperties.getProperties().isEmpty())
+		if (AzureProperties.getProperties().isEmpty())
 			Logger.getLogger("Main").warning("NO Properties");
 		questions = db.getContainer("questions");
 		;
 	}
 
-    public CosmosItemResponse<QuestionDAO> putQuestion(QuestionDAO question){
-        init();
-        return questions.createItem(question);
-    }
-
-    public CosmosPagedIterable<QuestionDAO> getQuestionById(String id) {
+	public CosmosItemResponse<QuestionDAO> putQuestion(QuestionDAO question) {
 		init();
-		return questions.queryItems("SELECT * FROM questions WHERE questions.id=\"" + id + "\"", new CosmosQueryRequestOptions(),
+		return questions.createItem(question);
+	}
+
+	public CosmosPagedIterable<QuestionDAO> getQuestionById(String id) {
+		init();
+		return questions.queryItems("SELECT * FROM questions WHERE questions.id=\"" + id + "\"",
+				new CosmosQueryRequestOptions(),
 				QuestionDAO.class);
 	}
 
-    public CosmosPagedIterable<QuestionDAO> getQuestionsByAuctionId(String auctionId) {
+	public CosmosPagedIterable<QuestionDAO> getQuestionsByAuctionId(String auctionId) {
 		init();
-		return questions.queryItems("SELECT * FROM questions WHERE questions.auctionId=\"" + auctionId + "\"", new CosmosQueryRequestOptions(),
+		return questions.queryItems("SELECT * FROM questions WHERE questions.auctionId=\"" + auctionId + "\"",
+				new CosmosQueryRequestOptions(),
 				QuestionDAO.class);
 	}
 
-    public void close() {
+	public CosmosItemResponse<QuestionDAO> updateQuestion(Question question) {
+		init();
+		return questions.upsertItem(new QuestionDAO(question));
+	}
+
+	public void close() {
 		client.close();
 	}
 
