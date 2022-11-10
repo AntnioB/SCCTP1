@@ -54,4 +54,13 @@ public class RedisCache {
 		return value;
 	}
 
+	public synchronized static long deleteKey(String key){
+		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			return jedis.del(key);
+		} catch (Exception e) {
+			throw new JedisException("Error when deleting key!");
+		}
+	}
+
+
 }

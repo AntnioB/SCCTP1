@@ -74,10 +74,7 @@ public class AuctionResource {
             RedisCache.checkCookieUser(session, ownerId);
 
             try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-                String value = jedis.get(id);
-
-                if (value != null && value.length() != 0)
-                    return value;
+                jedis.del(id);
             }
             CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
             CosmosItemResponse<Object> res = db.delAuctionById(id);
@@ -85,7 +82,6 @@ public class AuctionResource {
             if (resStatus > 300)
                 throw new WebApplicationException(resStatus);
             String value = String.valueOf(res.getStatusCode());
-            RedisCache.getCachePool().getResource().set(id, value);
             return value;
         } catch (WebApplicationException e) {
             throw e;
@@ -103,6 +99,7 @@ public class AuctionResource {
 
         try {
             RedisCache.checkCookieUser(session, auction.getOwnerId());
+            
             CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
             if (!auctionExists(auction.getId(), db))
                 throw new WebApplicationException("Auction not found", 404);
