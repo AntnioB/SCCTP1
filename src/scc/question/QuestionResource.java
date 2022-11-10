@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
-import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
@@ -22,8 +21,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
 import scc.cache.RedisCache;
-import scc.user.CosmosDBLayer;
-import scc.user.UserDAO;
 
 @Path("/auction/{id}/question")
 public class QuestionResource {

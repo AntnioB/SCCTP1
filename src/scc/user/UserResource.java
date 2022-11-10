@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import jakarta.ws.rs.WebApplicationException;
 
-import com.azure.core.annotation.Post;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
