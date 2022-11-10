@@ -25,6 +25,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import redis.clients.jedis.Jedis;
 import scc.cache.RedisCache;
 import scc.user.CosmosDBLayer;
 import scc.user.UserDAO;
@@ -69,16 +70,23 @@ public class AuctionResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String deleteAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id,
             String ownerId) {
-
         try {
             RedisCache.checkCookieUser(session, ownerId);
 
+            try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+                String value = jedis.get(id);
+
+                if (value != null && value.length() != 0)
+                    return value;
+            }
             CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
             CosmosItemResponse<Object> res = db.delAuctionById(id);
             int resStatus = res.getStatusCode();
             if (resStatus > 300)
                 throw new WebApplicationException(resStatus);
-            return String.valueOf(res.getStatusCode());
+            String value = String.valueOf(res.getStatusCode());
+            RedisCache.getCachePool().getResource().set(id, value);
+            return value;
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -95,7 +103,6 @@ public class AuctionResource {
 
         try {
             RedisCache.checkCookieUser(session, auction.getOwnerId());
-
             CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
             if (!auctionExists(auction.getId(), db))
                 throw new WebApplicationException("Auction not found", 404);
