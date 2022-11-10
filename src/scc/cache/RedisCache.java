@@ -32,7 +32,7 @@ public class RedisCache {
 
 	public synchronized static void putCookie(String uuid, String userId) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-			jedis.set("cookie:" + uuid, userId);
+			jedis.set(uuid, userId);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -40,7 +40,7 @@ public class RedisCache {
 
 	public synchronized static String checkCookieUser(Cookie session, String id) throws NotAuthorizedException {
 		if (session == null || session.getValue() == null)
-			throw new NotAuthorizedException("No session initialized");
+			throw new NotAuthorizedException("No session initialized 1");
 		String value;
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			value = jedis.get(session.getValue());
@@ -48,7 +48,7 @@ public class RedisCache {
 			throw new JedisException("Error in get cookie!");
 		}
 		if (value == null ||  value.length() == 0)
-			throw new NotAuthorizedException("No valid session initialized");
+			throw new NotAuthorizedException("No valid session initialized 2");
 		if (!value.equals(id) && !value.equals("admin"))
 			throw new NotAuthorizedException("Invalid user : " + value);
 		return value;
