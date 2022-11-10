@@ -23,7 +23,6 @@ public class Question {
 
     public Question(String id, String ownerId, String auctionId, String message, Reply[] replies) {
         this.id=id;
-        this.id = UUID.randomUUID().toString();
         this.auctionId = auctionId;
         this.message = message;
         this.ownerId = ownerId;
