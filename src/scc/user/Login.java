@@ -10,7 +10,7 @@ import scc.utils.Hash;
 public class Login {
     
     private String id, password;
-    public Login(@JsonProperty("id") String id, @JsonProperty("password") String password){
+    public Login(@JsonProperty("id") String id, @JsonProperty("pwd") String password){
         this.id=id;
         this.password=password;
     }

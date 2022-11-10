@@ -90,17 +90,27 @@ public class AuctionResource {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String updateAuction(@CookieParam("scc:session") Cookie session, Auction auction) throws JsonProcessingException {
-        CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
-        if (!auctionExists(auction.getId(), db))
-            throw new WebApplicationException("Auction not found", 404);
-        CosmosItemResponse<AuctionDAO> res = db.updateAuction(new AuctionDAO(auction));
-        int statusCode = res.getStatusCode();
-        if (statusCode > 300)
-            throw new WebApplicationException(statusCode);
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(res.getItem().toAuction());
-        return json;
+    public String updateAuction(@CookieParam("scc:session") Cookie session, Auction auction)
+            throws JsonProcessingException {
+
+        try {
+            RedisCache.checkCookieUser(session, auction.getOwnerId());
+
+            CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
+            if (!auctionExists(auction.getId(), db))
+                throw new WebApplicationException("Auction not found", 404);
+            CosmosItemResponse<AuctionDAO> res = db.updateAuction(new AuctionDAO(auction));
+            int statusCode = res.getStatusCode();
+            if (statusCode > 300)
+                throw new WebApplicationException(statusCode);
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String json = ow.writeValueAsString(res.getItem().toAuction());
+            return json;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @GET
