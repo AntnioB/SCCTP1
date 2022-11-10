@@ -5,12 +5,11 @@ import jakarta.ws.rs.core.Cookie;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import scc.utils.AzureProperties;
 import redis.clients.jedis.exceptions.JedisException;
 
+import scc.srv.MainApplication;
+
 public class RedisCache {
-	private static final String RedisHostname = AzureProperties.getProperties().getProperty(AzureProperties.REDIS_URL);
-	private static final String RedisKey = AzureProperties.getProperties().getProperty(AzureProperties.REDIS_KEY);
 
 	private static JedisPool instance;
 
@@ -26,7 +25,7 @@ public class RedisCache {
 		poolConfig.setTestWhileIdle(true);
 		poolConfig.setNumTestsPerEvictionRun(3);
 		poolConfig.setBlockWhenExhausted(true);
-		instance = new JedisPool(poolConfig, RedisHostname, 6380, 1000, RedisKey, true);
+		instance = new JedisPool(poolConfig, MainApplication.REDIS_HOSTNAME, 6380, 1000, MainApplication.REDIS_KEY, true);
 		return instance;
 
 	}

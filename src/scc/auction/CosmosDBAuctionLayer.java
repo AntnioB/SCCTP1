@@ -1,6 +1,5 @@
 package scc.auction;
 
-import java.util.logging.Logger;
 
 import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.CosmosClient;
@@ -13,12 +12,12 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
-import scc.utils.AzureProperties;
+import scc.srv.MainApplication;
 
 public class CosmosDBAuctionLayer {
-	private static final String CONNECTION_URL = "https://scc2358152.documents.azure.com:443/";
-	private static final String DB_KEY = "JWMuqWZDbMyaQsblMkKNYM546yh9E2pt6lbubC91xt0v83To5IMGByfZzSWmuGGNtGgYyTRx4KtByWNHdyKMWQ==";
-	private static final String DB_NAME = "scc23db58152";
+	private static final String CONNECTION_URL = MainApplication.CONNECTION_URL;
+	private static final String DB_KEY = MainApplication.DB_KEY;
+	private static final String DB_NAME = MainApplication.DB_NAME;
 
 	private static CosmosDBAuctionLayer instance;
 
@@ -53,8 +52,6 @@ public class CosmosDBAuctionLayer {
 		if (db != null)
 			return;
 		db = client.getDatabase(DB_NAME);
-		if (AzureProperties.getProperties().isEmpty())
-			Logger.getLogger("Main").warning("NO Properties");
 		auctions = db.getContainer("auctions");
 
 	}

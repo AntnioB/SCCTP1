@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
 import scc.utils.Hash;
 

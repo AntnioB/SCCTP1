@@ -11,12 +11,13 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
-import scc.utils.AzureProperties;
+import scc.srv.MainApplication;
 
 public class CosmosDBLayer {
-	private static final String CONNECTION_URL = "https://scc2358152.documents.azure.com:443/";
-	private static final String DB_KEY = "JWMuqWZDbMyaQsblMkKNYM546yh9E2pt6lbubC91xt0v83To5IMGByfZzSWmuGGNtGgYyTRx4KtByWNHdyKMWQ==";
-	private static final String DB_NAME = "scc23db58152";
+	private static final String CONNECTION_URL = MainApplication.CONNECTION_URL;
+	private static final String DB_KEY = MainApplication.DB_KEY;
+	private static final String DB_NAME = MainApplication.DB_NAME;
+
 
 	private static CosmosDBLayer instance;
 
@@ -52,7 +53,6 @@ public class CosmosDBLayer {
 			return;
 		db = client.getDatabase(DB_NAME);
 		users = db.getContainer("users");
-		AzureProperties.getProperties().list(System.out);
 	}
 
 	public CosmosItemResponse<Object> delUserById(String id) {

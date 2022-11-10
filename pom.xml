@@ -106,6 +106,21 @@
       <artifactId>jackson-datatype-jsr310</artifactId>
       <version>2.13.4</version>
     </dependency>
+  		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure</artifactId>
+			<version>1.41.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-cosmos</artifactId>
+			<version>4.37.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.13.4</version>
+		</dependency>
   </dependencies>  
   <build> 
     <sourceDirectory>src</sourceDirectory>  
