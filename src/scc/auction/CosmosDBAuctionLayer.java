@@ -1,6 +1,5 @@
 package scc.auction;
 
-
 import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
@@ -12,6 +11,9 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import scc.cache.RedisCache;
 import scc.srv.MainApplication;
 
 public class CosmosDBAuctionLayer {
@@ -69,6 +71,7 @@ public class CosmosDBAuctionLayer {
 
 	public CosmosItemResponse<AuctionDAO> putAuction(AuctionDAO auction) {
 		init();
+		RedisCache.getCachePool().getResource().set(auction.getId(), auction.toAuction().toString());
 		return auctions.createItem(auction);
 	}
 
