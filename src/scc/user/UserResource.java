@@ -6,25 +6,55 @@ import java.util.UUID;
 
 import jakarta.ws.rs.WebApplicationException;
 
+import com.azure.core.annotation.Post;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.Response;
+import scc.cache.RedisCache;
 import scc.utils.Hash;
 
 @Path("/user")
 public class UserResource {
+
+    @POST
+    @Path("/auth")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response auth(Login login) {
+
+        boolean pwdOk = login.authenticate();
+
+        if (pwdOk == true) {
+            String uid = UUID.randomUUID().toString();
+            NewCookie cookie = new NewCookie.Builder("scc:session")
+                    .value(uid)
+                    .path("/")
+                    .comment("sessionid")
+                    .maxAge(3600)
+                    .secure(false)
+                    .httpOnly(true)
+                    .build();
+            RedisCache.putCookie(uid, login.getId());
+            return Response.ok().cookie(cookie).build();
+        } else
+            throw new NotAuthorizedException("Incorrect login");
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -53,30 +83,50 @@ public class UserResource {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String deleteUser(@PathParam("id") String id) {
-        CosmosDBLayer db = CosmosDBLayer.getInstance();
-        CosmosItemResponse<Object> res = db.delUserById(id);
-        int resStatus = res.getStatusCode();
-        if (resStatus > 300)
-            throw new WebApplicationException(resStatus);
-        return String.valueOf(res.getStatusCode());
+    public String deleteUser(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) {
+        try {
+
+            RedisCache.checkCookieUser(session, id);
+
+            CosmosDBLayer db = CosmosDBLayer.getInstance();
+            CosmosItemResponse<Object> res = db.delUserById(id);
+            int resStatus = res.getStatusCode();
+            if (resStatus > 300)
+                throw new WebApplicationException(resStatus);
+            return String.valueOf(res.getStatusCode());
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException(e);
+        }
+
     }
 
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String updateUser(User user) throws JsonProcessingException {
-        CosmosDBLayer db = CosmosDBLayer.getInstance();
-        if(!userExists(user.getId(), db))
-            throw new WebApplicationException(409);
-        CosmosItemResponse<UserDAO> res = db.updateUser(new UserDAO(user));
-        int statusCode = res.getStatusCode();
-        if (statusCode > 300)
-            throw new WebApplicationException(statusCode);
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(res.getItem().toUser());
-        return json;
+    public String updateUser(@CookieParam("scc:session") Cookie session, User user) throws JsonProcessingException {
+
+        try {
+            RedisCache.checkCookieUser(session, user.getId());
+
+            CosmosDBLayer db = CosmosDBLayer.getInstance();
+            if (!userExists(user.getId(), db))
+                throw new WebApplicationException(409);
+            CosmosItemResponse<UserDAO> res = db.updateUser(new UserDAO(user));
+            int statusCode = res.getStatusCode();
+            if (statusCode > 300)
+                throw new WebApplicationException(statusCode);
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String json = ow.writeValueAsString(res.getItem().toUser());
+            return json;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException(e);
+        }
+
     }
 
     @GET

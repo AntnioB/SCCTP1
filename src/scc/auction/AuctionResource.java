@@ -12,8 +12,10 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.POST;
@@ -21,10 +23,11 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import scc.cache.RedisCache;
 import scc.user.CosmosDBLayer;
 import scc.user.UserDAO;
-
 
 @Path("/auction")
 public class AuctionResource {
@@ -32,45 +35,65 @@ public class AuctionResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createAuction(Auction auction) throws JsonProcessingException {
-        ObjectMapper om = new ObjectMapper()
-                .registerModule(new JavaTimeModule());
-        ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
-        auction.setId(UUID.randomUUID().toString());
-        Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator();
-        if(!ite.hasNext())
-            throw new NotFoundException("User does not exist");
-        if(auction.getEndTime().isBefore(ZonedDateTime.now()))
-            return "Prohibited Time";
-        CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(new AuctionDAO(auction));
-        int statusCode = res.getStatusCode();
-        if (statusCode > 300)
-            throw new WebApplicationException(statusCode);
+    public String createAuction(@CookieParam("scc:session") Cookie session, Auction auction)
+            throws JsonProcessingException {
 
-        String json = ow.writeValueAsString(res.getItem().toAuction());
-        return json;
+        try {
+            RedisCache.checkCookieUser(session, auction.getOwnerId());
+
+            ObjectMapper om = new ObjectMapper()
+                    .registerModule(new JavaTimeModule());
+            ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
+            auction.setId(UUID.randomUUID().toString());
+            Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator();
+            if (!ite.hasNext())
+                throw new NotFoundException("User does not exist");
+            if (auction.getEndTime().isBefore(ZonedDateTime.now()))
+                return "Prohibited Time";
+            CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(new AuctionDAO(auction));
+            int statusCode = res.getStatusCode();
+            if (statusCode > 300)
+                throw new WebApplicationException(statusCode);
+
+            String json = ow.writeValueAsString(res.getItem().toAuction());
+            return json;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String deleteAuction(@PathParam("id") String id) {
-        CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
-        CosmosItemResponse<Object> res = db.delAuctionById(id);
-        int resStatus = res.getStatusCode();
-        if (resStatus > 300)
-            throw new WebApplicationException(resStatus);
-        return String.valueOf(res.getStatusCode());
+    public String deleteAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id,
+            String ownerId) {
+
+        try {
+            RedisCache.checkCookieUser(session, ownerId);
+
+            CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
+            CosmosItemResponse<Object> res = db.delAuctionById(id);
+            int resStatus = res.getStatusCode();
+            if (resStatus > 300)
+                throw new WebApplicationException(resStatus);
+            return String.valueOf(res.getStatusCode());
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String updateAuction(Auction auction) throws JsonProcessingException {
+    public String updateAuction(@CookieParam("scc:session") Cookie session, Auction auction) throws JsonProcessingException {
         CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
         if (!auctionExists(auction.getId(), db))
-            throw new WebApplicationException("Auction not found",404);
+            throw new WebApplicationException("Auction not found", 404);
         CosmosItemResponse<AuctionDAO> res = db.updateAuction(new AuctionDAO(auction));
         int statusCode = res.getStatusCode();
         if (statusCode > 300)
