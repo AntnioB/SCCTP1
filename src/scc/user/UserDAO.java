@@ -1,7 +1,5 @@
 package scc.user;
 
-import java.util.Arrays;
-
 /**
  * Represents a User, as stored in the database
  */
@@ -12,20 +10,18 @@ public class UserDAO {
 	private String name;
 	private String pwd;
 	private String photoId;
-	private String[] channelIds;
 
 	public UserDAO() {
 	}
 	public UserDAO( User u) {
-		this(u.getId(), u.getName(), u.getPwd(), u.getPhotoId(), u.getChannelIds());
+		this(u.getId(), u.getName(), u.getPwd(), u.getPhotoId());
 	}
-	public UserDAO(String id, String name, String pwd, String photoId, String[] channelIds) {
+	public UserDAO(String id, String name, String pwd, String photoId) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.pwd = pwd;
 		this.photoId = photoId;
-		this.channelIds = channelIds;
 	}
 	public String get_rid() {
 		return _rid;
@@ -63,19 +59,14 @@ public class UserDAO {
 	public void setPhotoId(String photoId) {
 		this.photoId = photoId;
 	}
-	public String[] getChannelIds() {
-		return channelIds == null ? new String[0] : channelIds ;
-	}
-	public void setChannelIds(String[] channelIds) {
-		this.channelIds = channelIds;
-	}
+
 	public User toUser() {
-		return new User( id, name, pwd, photoId, channelIds == null ? null : Arrays.copyOf(channelIds,channelIds.length));
+		return new User( id, name, pwd, photoId);
 	}
 	@Override
 	public String toString() {
 		return "UserDAO [_rid=" + _rid + ", _ts=" + _ts + ", id=" + id + ", name=" + name + ", pwd=" + pwd
-				+ ", photoId=" + photoId + ", channelIds=" + Arrays.toString(channelIds) + "]";
+				+ ", photoId=" + photoId + "]";
 	}
 
 }

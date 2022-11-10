@@ -1,7 +1,5 @@
 package scc.user;
 
-import java.util.Arrays;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -12,13 +10,11 @@ public class User {
 	private String name;
 	private String pwd;
 	private String photoId;
-	private String[] channelIds;
-	public User(@JsonProperty("id") String id,@JsonProperty("name") String name,@JsonProperty("pwd") String pwd,@JsonProperty("photoId") String photoId,@JsonProperty("channelIds") String[] channelIds) {
+	public User(@JsonProperty("id") String id,@JsonProperty("name") String name,@JsonProperty("pwd") String pwd,@JsonProperty("photoId") String photoId) {
 		this.id = id;
 		this.name = name;
 		this.pwd = pwd;
 		this.photoId = photoId;
-		this.channelIds = channelIds;
 	}
 	public String getId() {
 		return id;
@@ -44,16 +40,10 @@ public class User {
 	public void setPhotoId(String photoId) {
 		this.photoId = photoId;
 	}
-	public String[] getChannelIds() {
-		return channelIds == null ? new String[0] : channelIds ;
-	}
-	public void setChannelIds(String[] channelIds) {
-		this.channelIds = channelIds;
-	}
+	
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", pwd=" + pwd + ", photoId=" + photoId + ", channelIds="
-				+ Arrays.toString(channelIds) + "]";
+		return "User [id=" + id + ", name=" + name + ", pwd=" + pwd + ", photoId=" + photoId + "]";
 	}
 
 }
