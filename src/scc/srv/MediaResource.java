@@ -20,6 +20,9 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * Resource for managing media files, such as images.
@@ -28,7 +31,7 @@ import com.azure.storage.blob.models.BlobItem;
 public class MediaResource {
 
 	// Get connection string in the storage access keys page
-	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=sccstwesteurope58152;AccountKey=dTLHRViEyorNqXTsjDkopsU6fw1TfIXZTBcqeJjFI1gtnmpDEjF4P+5AxamW453yVodXMWUUdTzn+ASt90iXTw==;EndpointSuffix=core.windows.net";
+	String storageConnectionString = MainApplication.STORAGE_CONNECTION_STRING;
 
 	private BlobContainerClient getContainerClient() {
 
@@ -48,11 +51,13 @@ public class MediaResource {
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String upload(byte[] contents) {
+	public String upload(byte[] contents) throws JsonProcessingException {
 		String key = Hash.of(contents);
 		BlobClient blob = getContainerClient().getBlobClient(key);
 		blob.upload(BinaryData.fromBytes(contents), true);
-		return key;
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString(key);
+		return json;
 	}
 
 	/**

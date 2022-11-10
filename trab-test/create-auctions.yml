@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc23appnortheurope4204.azurewebsites.net/rest'
+  target: 'https://scc-backend-58152.azurewebsites.net/rest'
   http:
     timeout: 10
   plugins:
@@ -27,7 +27,7 @@ scenarios:
             headers:
               Content-Type: application/json
             json:
-              user: "{{ user }}"
+              user: "{{ id }}"
               pwd: "{{ pwd }}"
         - function: "genNewAuction"
         - post:                          # First: post image for the auction
@@ -39,7 +39,7 @@ scenarios:
             beforeRequest: "uploadImageBody"
             capture: 
               regexp: "(.+)"
-              as: "imageId"              # capture the reply as image id to be used in uction creation
+              as: "photoId"              # capture the reply as image id to be used in uction creation
         - post:                          # Create auction
             url: "/auction"
             name: "POST:/auction"
@@ -49,10 +49,10 @@ scenarios:
             json:
               description: "{{ description }}"
               title: "{{ title }}"
-              owner: "{{ user }}"
-              imageId: "{{ imageId }}"
+              owner: "{{ ownerId }}"
+              photoId: "{{ photoId }}"
               endTime: "{{ endTime }}"
-              minimumPrice: "{{ minimumPrice }}"
+              minPrice: "{{ minPrice }}"
               status: "{{ status }}"
             capture:                     # Capturing auction id and store it in variable auctionId
               - json: $.id

@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc23appnortheurope4204.azurewebsites.net/rest'
+  target: 'https://scc-backend-58152.azurewebsites.net/rest'
   http:
     timeout: 30
   plugins:
@@ -27,7 +27,7 @@ scenarios:
             beforeRequest: "uploadImageBody"
             capture: 
               regexp: "(.+)"
-              as: "imageId"              # capture the reply as image id to be used in user creation
+              as: "photoId"              # capture the reply as image id to be used in user creation
         - function: "genNewUser"         # Generate the needed information for the user
         - post:
             url: "/user"
@@ -39,6 +39,6 @@ scenarios:
               id: "{{ id }}"
               name: "{{ name }}"
               pwd: "{{ pwd }}"
-              photoId: "{{ imageId }}"
+              photoId: "{{ photoId }}"
             afterResponse: "genNewUserReply"    # capture result and store in file
         count: "{{ numUsers }}"
