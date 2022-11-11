@@ -34,30 +34,44 @@ public class BidResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String createBid(@CookieParam("scc:session") Cookie session, Bid bid, @PathParam("id") String auctionId)
             throws JsonProcessingException {
+           
         bid.setId(UUID.randomUUID().toString());
-
+       
         Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(bid.getBidderId()).iterator();
+       
+        
+        
         if (!ite.hasNext())
             throw new NotFoundException("User does not exist");
 
         try {
             RedisCache.checkCookieUser(session, bid.getBidderId());
 
+            
+
             CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
+            if(true) throw new WebApplicationException(405);
             BidDAO highestBid = db.getHighestBid(auctionId).iterator().next();
             if (highestBid != null && bid.getAmount() <= highestBid.getAmount())
                 throw new WebApplicationException(403);
+            
+            //here
             CosmosItemResponse<BidDAO> res = db.putBid(new BidDAO(bid));
             int statusCode = res.getStatusCode();
-            if (statusCode > 300)
+            //here
+            if (statusCode > 300){
+                //here
                 throw new WebApplicationException(statusCode);
-
+            }
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            //here
             String json = ow.writeValueAsString(res.getItem().toBid());
             return json;
         } catch (WebApplicationException e) {
+            e.printStackTrace();
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new InternalServerErrorException(e);
         }
     }
