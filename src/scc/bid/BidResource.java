@@ -20,6 +20,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
 import scc.user.CosmosDBLayer;
 import scc.user.UserDAO;
@@ -47,16 +48,20 @@ public class BidResource {
         try {
             RedisCache.checkCookieUser(session, bid.getBidderId());
 
-            
-
-            CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
-            if(true) throw new WebApplicationException(405);
-            BidDAO highestBid = db.getHighestBid(auctionId).iterator().next();
-            if (highestBid != null && bid.getAmount() <= highestBid.getAmount())
+            double minBidAmount;
+            CosmosDBBidLayer bidDB = CosmosDBBidLayer.getInstance();
+            Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
+            if(highestBid.hasNext())
+                minBidAmount = highestBid.next().getAmount();
+            else {
+                CosmosDBAuctionLayer auctionDB = CosmosDBAuctionLayer.getInstance();
+                minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
+            }
+            if(bid.getAmount() <= minBidAmount)
                 throw new WebApplicationException(403);
             
             //here
-            CosmosItemResponse<BidDAO> res = db.putBid(new BidDAO(bid));
+            CosmosItemResponse<BidDAO> res = bidDB.putBid(new BidDAO(bid));
             int statusCode = res.getStatusCode();
             //here
             if (statusCode > 300){
