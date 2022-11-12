@@ -136,4 +136,18 @@ public class AuctionResource {
         return res.isPresent();
     }
 
+
+    //TODO just for testing purposes need to delete
+    @DELETE
+    @Path("/delete")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String deleteAll() {
+        CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
+        Iterator<AuctionDAO> ite = db.getAuctions().iterator();
+        while (ite.hasNext()) {
+            db.delAuction(ite.next());
+        }
+        return "200";
+    }
+
 }
