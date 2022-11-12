@@ -3,3 +3,5 @@ trab-test/images/
 trab-test/node_modules/
 .xml
 src/scc/utils/azurekeys-westeurope.props
+trab-test/package.json
+trab-test/package-lock.json

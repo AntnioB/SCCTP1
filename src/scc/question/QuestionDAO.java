@@ -1,6 +1,5 @@
 package scc.question;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class QuestionDAO {
@@ -8,12 +7,12 @@ public class QuestionDAO {
     private String _rid, _ts, id, ownerId, auctionId, message;
     private List<Reply> replies;
 
-    public QuestionDAO(String id, String ownerId, String auctionId, String message, Reply[] replies) {
+    public QuestionDAO(String id, String ownerId, String auctionId, String message, List<Reply> replies) {
         this.id = id;
         this.ownerId = ownerId;
         this.auctionId = auctionId;
         this.message = message;
-        this.replies = Arrays.asList(replies);
+        this.replies = replies;
     }
 
     public QuestionDAO(Question q) {
@@ -77,7 +76,7 @@ public class QuestionDAO {
     }
 
     public Question toQuestion() {
-        return new Question(id, ownerId, auctionId, message, getReplies().toArray(new Reply[10]));
+        return new Question(id, ownerId, auctionId, message, replies);
     }
 
     @Override

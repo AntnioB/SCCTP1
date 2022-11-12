@@ -45,9 +45,7 @@ public class QuestionResource {
             return json;
         } catch (WebApplicationException e) {
             throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e);
-        }
+        } 
     }
 
     @POST

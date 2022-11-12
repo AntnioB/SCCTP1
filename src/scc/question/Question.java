@@ -1,32 +1,34 @@
 package scc.question;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class Question {
 
     private String id, ownerId, auctionId, message;
+
+    @JsonDeserialize(using = )
     private List<Reply> replies;
 
     public Question(@JsonProperty("ownerId") String ownerId,
-            @JsonProperty("auctionId") String auctionId, @JsonProperty("message") String message,
-            @JsonProperty("replies") Reply[] replies) {
+            @JsonProperty("auctionId") String auctionId, @JsonProperty("message") String message) {
         this.id = UUID.randomUUID().toString();
         this.auctionId = auctionId;
         this.message = message;
         this.ownerId = ownerId;
-        this.replies = Arrays.asList(replies);
+        this.replies = new ArrayList<Reply>();
     }
 
-    public Question(String id, String ownerId, String auctionId, String message, Reply[] replies) {
+    public Question(String id, String ownerId, String auctionId, String message, List<Reply> replies) {
         this.id=id;
         this.auctionId = auctionId;
         this.message = message;
         this.ownerId = ownerId;
-        this.replies = Arrays.asList(replies);
+        this.replies = replies;
     }
 
     public String getId() {
@@ -61,8 +63,8 @@ public class Question {
         this.ownerId = ownerId;
     }
 
-    public Reply[] getReplies() {
-        return this.replies.toArray(new Reply[10]);
+    public List<Reply> getReplies() {
+        return this.replies;
     }
 
     public void addReply(Reply reply) {
