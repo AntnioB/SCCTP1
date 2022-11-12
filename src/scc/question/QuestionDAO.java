@@ -1,13 +1,15 @@
 package scc.question;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class QuestionDAO {
 
     private String _rid, _ts, id, ownerId, auctionId, message;
-    private List<Reply> replies;
+    private Reply[] replies;
 
-    public QuestionDAO(String id, String ownerId, String auctionId, String message, List<Reply> replies) {
+    public QuestionDAO(String id, String ownerId, String auctionId, String message, Reply[] replies) {
         this.id = id;
         this.ownerId = ownerId;
         this.auctionId = auctionId;
@@ -16,7 +18,7 @@ public class QuestionDAO {
     }
 
     public QuestionDAO(Question q) {
-        this(q.getId(), q.getOwnerId(), q.getAuctionId(), q.getMessage(), q.getReplies());
+        this(q.getId(), q.getOwnerId(), q.getAuctionId(), q.getMessage(), q.getReplies().toArray(new Reply[q.getReplies().size()]));
     }
 
     public String get_rid() {
@@ -67,16 +69,16 @@ public class QuestionDAO {
         this.message = message;
     }
 
-    public List<Reply> getReplies() {
+    public Reply[] getReplies() {
         return this.replies;
     }
 
-    public void setReplies(List<Reply> replies) {
+    public void setReplies(Reply[] replies) {
         this.replies = replies;
     }
 
     public Question toQuestion() {
-        return new Question(id, ownerId, auctionId, message, replies);
+        return new Question(id, ownerId, auctionId, message, Arrays.asList(replies));
     }
 
     @Override

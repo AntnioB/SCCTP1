@@ -11,7 +11,6 @@ public class Question {
 
     private String id, ownerId, auctionId, message;
 
-    @JsonDeserialize(using = )
     private List<Reply> replies;
 
     public Question(@JsonProperty("ownerId") String ownerId,
