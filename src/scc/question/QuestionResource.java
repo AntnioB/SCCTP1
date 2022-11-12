@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -52,10 +51,11 @@ public class QuestionResource {
     @Path("/{questionId}/reply")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createReply(@CookieParam("scc:session") Cookie session, Reply reply, @PathParam("id") String id,
+    public String createReply(@CookieParam("scc:session") Cookie session, String reply, @PathParam("id") String id,
             @PathParam("questionId") String questionId)
             throws JsonProcessingException {
 
+                //TODO o gajo que faz a reply kinda devia ser o dono to auction e nao o toni da estacao 
         try {
             RedisCache.checkCookieUser(session, id);
             
@@ -64,7 +64,7 @@ public class QuestionResource {
             if (!ite.hasNext())
                 throw new NotFoundException("Question does not exist");
             Question question = ite.next().toQuestion();
-            question.addReply(reply);
+            question.setReply(reply);
             CosmosItemResponse<QuestionDAO> res = db.updateQuestion(question);
             int statusCode = res.getStatusCode();
             if (statusCode > 300)
@@ -74,9 +74,7 @@ public class QuestionResource {
             return json;
         } catch (WebApplicationException e) {
             throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e);
-        }
+        } 
 
     }
 

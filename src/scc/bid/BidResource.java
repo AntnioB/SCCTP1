@@ -73,12 +73,8 @@ public class BidResource {
             String json = ow.writeValueAsString(res.getItem().toBid());
             return json;
         } catch (WebApplicationException e) {
-            e.printStackTrace();
             throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new InternalServerErrorException(e);
-        }
+        } 
     }
 
     @GET
