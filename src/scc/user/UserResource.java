@@ -138,6 +138,7 @@ public class UserResource {
         return res.toString();
     }
 
+    //TODO just for testing purposes need to delete
     @DELETE
     @Path("/delete")
     @Produces(MediaType.TEXT_PLAIN)
