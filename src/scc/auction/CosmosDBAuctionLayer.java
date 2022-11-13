@@ -11,8 +11,6 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 import scc.cache.RedisCache;
 import scc.srv.MainApplication;
 

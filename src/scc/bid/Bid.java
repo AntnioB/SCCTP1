@@ -1,12 +1,21 @@
 package scc.bid;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Bid {
     private double amount;
     private String id, auctionId, bidderId;
 
-    public Bid(@JsonProperty("id") String id, @JsonProperty("auctionId") String auctionId, @JsonProperty("bidderId") String bidderId,@JsonProperty("amount") double amount){
+    public Bid(@JsonProperty("auctionId") String auctionId, @JsonProperty("bidderId") String bidderId,@JsonProperty("amount") double amount){
+        this.id = UUID.randomUUID().toString();
+        this.auctionId = auctionId;
+        this.bidderId = bidderId;
+        this.amount = amount;
+    }
+
+    public Bid(String id, String auctionId, String bidderId, double amount) {
         this.id = id;
         this.auctionId = auctionId;
         this.bidderId = bidderId;

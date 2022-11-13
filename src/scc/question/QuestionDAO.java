@@ -1,23 +1,19 @@
 package scc.question;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class QuestionDAO {
 
-    private String _rid, _ts, id, ownerId, auctionId, message;
-    private List<Reply> replies;
+    private String _rid, _ts, id, ownerId, auctionId, message, reply;
 
-    public QuestionDAO(String id, String ownerId, String auctionId, String message, Reply[] replies) {
+    public QuestionDAO(String id, String ownerId, String auctionId, String message, String reply) {
         this.id = id;
         this.ownerId = ownerId;
         this.auctionId = auctionId;
         this.message = message;
-        this.replies = Arrays.asList(replies);
+        this.reply = reply;
     }
 
     public QuestionDAO(Question q) {
-        this(q.getId(), q.getOwnerId(), q.getAuctionId(), q.getMessage(), q.getReplies());
+        this(q.getId(), q.getOwnerId(), q.getAuctionId(), q.getMessage(), q.getReply());
     }
 
     public String get_rid() {
@@ -68,22 +64,22 @@ public class QuestionDAO {
         this.message = message;
     }
 
-    public List<Reply> getReplies() {
-        return this.replies;
+    public String getReply() {
+        return this.reply;
     }
 
-    public void setReplies(List<Reply> replies) {
-        this.replies = replies;
+    public void setReply(String reply) {
+        this.reply = reply;
     }
 
     public Question toQuestion() {
-        return new Question(id, ownerId, auctionId, message, getReplies().toArray(new Reply[10]));
+        return new Question(id, ownerId, auctionId, message, reply);
     }
 
     @Override
     public String toString() {
         return "Question [id = " + id + "\n ownerId = " + ownerId + "\n auctionId = " + auctionId + "\n message = "
-                + message + "\n replies = " + replies.toString() + "]";
+                + message + "\n replies = " + reply.toString() + "]";
     }
 
 }

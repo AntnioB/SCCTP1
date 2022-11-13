@@ -59,14 +59,7 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String createUser(User user) throws JsonProcessingException {
-        /**
-         * Iterator<UserDAO> ite =
-         * CosmosDBLayer.getInstance().getUserById(user.getId()).iterator();
-         * while(ite.hasNext()){
-         * if(ite.next().getId().equals(user.getId()))
-         * throw new WebApplicationException(403);
-         * }
-         */
+
         UserDAO tmp = new UserDAO(user);
         tmp.setId(UUID.randomUUID().toString());
         tmp.setPwd(Hash.of(user.getPwd()));
@@ -75,8 +68,12 @@ public class UserResource {
         if (statusCode > 300)
             throw new WebApplicationException(statusCode);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+
+        // TODO kinda trash
+        User aux = res.getItem().toUser();
+        aux.setPwd(user.getPwd());
+        String json = ow.writeValueAsString(aux);
         RedisCache.putUser(user.getId(), user.toString());
-        String json = ow.writeValueAsString(res.getItem().toUser());
         return json;
     }
 
@@ -144,6 +141,7 @@ public class UserResource {
         return res.toString();
     }
 
+    // TODO just for testing purposes need to delete
     @DELETE
     @Path("/delete")
     @Produces(MediaType.TEXT_PLAIN)

@@ -20,6 +20,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
 import scc.user.CosmosDBLayer;
 import scc.user.UserDAO;
@@ -34,32 +35,46 @@ public class BidResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String createBid(@CookieParam("scc:session") Cookie session, Bid bid, @PathParam("id") String auctionId)
             throws JsonProcessingException {
+           
         bid.setId(UUID.randomUUID().toString());
-
+       
         Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(bid.getBidderId()).iterator();
+       
+        
+        
         if (!ite.hasNext())
             throw new NotFoundException("User does not exist");
 
         try {
             RedisCache.checkCookieUser(session, bid.getBidderId());
 
-            CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
-            BidDAO highestBid = db.getHighestBid(auctionId).iterator().next();
-            if (highestBid != null && bid.getAmount() <= highestBid.getAmount())
+            double minBidAmount;
+            CosmosDBBidLayer bidDB = CosmosDBBidLayer.getInstance();
+            Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
+            if(highestBid.hasNext())
+                minBidAmount = highestBid.next().getAmount();
+            else {
+                CosmosDBAuctionLayer auctionDB = CosmosDBAuctionLayer.getInstance();
+                minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
+            }
+            if(bid.getAmount() <= minBidAmount)
                 throw new WebApplicationException(403);
-            CosmosItemResponse<BidDAO> res = db.putBid(new BidDAO(bid));
+            
+            //here
+            CosmosItemResponse<BidDAO> res = bidDB.putBid(new BidDAO(bid));
             int statusCode = res.getStatusCode();
-            if (statusCode > 300)
+            //here
+            if (statusCode > 300){
+                //here
                 throw new WebApplicationException(statusCode);
-
+            }
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            //here
             String json = ow.writeValueAsString(res.getItem().toBid());
             return json;
         } catch (WebApplicationException e) {
             throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e);
-        }
+        } 
     }
 
     @GET
@@ -77,6 +92,7 @@ public class BidResource {
         return res.toString();
     }
 
+    //TODO just for testing purposes need to delete
     @DELETE
     @Path("/delete")
     @Produces(MediaType.TEXT_PLAIN)

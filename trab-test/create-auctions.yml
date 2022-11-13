@@ -47,18 +47,19 @@ scenarios:
               Content-Type: application/json
               Accept: application/json
             json:
+              id: "{{id}}"
               description: "{{ description }}"
               title: "{{ title }}"
-              owner: "{{ ownerId }}"
-              photoId: "{{ photoId }}"
+              ownerId: "{{ owner }}"
+              photoId: "{{ imageId }}"
               endTime: "{{ endTime }}"
-              minPrice: "{{ minPrice }}"
+              minPrice: "{{ minimumPrice }}"
               status: "{{ status }}"
             capture:                     # Capturing auction id and store it in variable auctionId
               - json: $.id
                 as: "auctionId"
               - json: $.owner
-                as: "auctionUser"
+                as: "ownerId"
         - loop:                          # Let's add numBids bids to the auction
           - function: "selectUserSkewed"
           - function: "genNewBid"
@@ -78,8 +79,8 @@ scenarios:
                 Accept: application/json
               json:
                 auctionId: "{{ auctionId }}"
-                user: "{{ user }}"
-                value: "{{ value }}"
+                bidderId: "{{ usser }}"
+                amount: "{{ value }}"
           count: "{{ numBids }}"   
         - loop:                          # Let's add numQuestions questions to the auction
           - function: "selectUserSkewed"
@@ -100,8 +101,8 @@ scenarios:
                 Accept: application/json
               json:
                 auctionId: "{{ auctionId }}"
-                user: "{{ user }}"
-                text: "{{ text }}"
+                ownerId: "{{ user }}"
+                message: "{{ text }}"
               capture:                     # Capturing question id and store it in variable questionId
                 - json: $.id
                   as: "questionId"
@@ -122,7 +123,9 @@ scenarios:
                 Content-Type: application/json
                 Accept: application/json
               json:
-                reply: "{{ reply }}"
+                ownerId: "{{ ownerId}}"
+                questionId: "{{ questionId}}"
+                message: "{{ message }}"
               ifTrue: "reply"
           count: "{{ numQuestions }}"   
         count: "{{ numAuctions }}"
