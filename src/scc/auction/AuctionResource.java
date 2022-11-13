@@ -2,9 +2,7 @@ package scc.auction;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,7 +24,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
-import redis.clients.jedis.Jedis;
 import scc.cache.RedisCache;
 import scc.user.CosmosDBLayer;
 import scc.user.UserDAO;
@@ -45,7 +42,6 @@ public class AuctionResource {
             ObjectMapper om = new ObjectMapper()
                     .registerModule(new JavaTimeModule());
             ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
-            auction.setId(UUID.randomUUID().toString());
             Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator();
             if (!ite.hasNext())
                 throw new NotFoundException("User does not exist");

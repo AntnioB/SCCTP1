@@ -1,6 +1,7 @@
 package scc.auction;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -20,10 +21,10 @@ public class Auction {
 	private Status status;
 	private String winnerBidId;
 
-    public Auction(@JsonProperty("id") String id, @JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
+    public Auction(@JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
      @JsonProperty("description") String description, @JsonProperty("ownerId") String ownerId,
      @JsonProperty("endTime") ZonedDateTime endTime, @JsonProperty("minPrice") double minPrice){
-		this.id = id;
+		this.id = UUID.randomUUID().toString();
 		this.title = title;
 		this.description = description;
 		this.photoId = photoId;
@@ -34,6 +35,18 @@ public class Auction {
 			status = Status.OPEN;
 		else status = Status.CLOSED;
 		winnerBidId = null;
+    }
+
+	public Auction(String id, String title,String photoId, String description, String ownerId,ZonedDateTime endTime, double minPrice, Status status, String winnerBidId){
+		this.id = id;
+		this.title = title;
+		this.description = description;
+		this.photoId = photoId;
+		this.ownerId = ownerId;
+        this.endTime = endTime;
+		this.minPrice = minPrice;
+		this.status = status;
+		this.winnerBidId = winnerBidId;
     }
 
     public String getId() {
@@ -96,6 +109,6 @@ public class Auction {
 	@Override
 	public String toString() {
 		return "Auction [id=" + id + ", title=" + title + ", description=" + description + ", photoId=" + photoId + ", owner="
-		+ ownerId+ ", endTime="+ endTime.toString()+ ", minPrice=" + minPrice + ", status= "+status.toString()+ "winnerBid="+winnerBidId+"]";
+		+ ownerId+ ", endTime="+ endTime.toString()+ ", minPrice=" + minPrice + ", status= "+status.toString()+ " winnerBid="+winnerBidId+"]";
 	}
 }
