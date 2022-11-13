@@ -69,7 +69,6 @@ public class CosmosDBAuctionLayer {
 
 	public CosmosItemResponse<AuctionDAO> putAuction(AuctionDAO auction) {
 		init();
-		RedisCache.getCachePool().getResource().set(auction.getId(), auction.toAuction().toString());
 		return auctions.createItem(auction);
 	}
 
