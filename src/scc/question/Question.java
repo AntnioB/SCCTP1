@@ -69,6 +69,6 @@ public class Question {
     @Override
     public String toString() {
         return "Question [id = " + id + "\n ownerId = " + ownerId + "\n auctionId = " + auctionId + "\n message = "
-                + message + "\n reply = " + reply.toString() + "]";
+                + message + "\n reply = " + reply + "]";
     }
 }

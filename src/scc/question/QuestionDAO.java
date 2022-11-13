@@ -16,6 +16,8 @@ public class QuestionDAO {
         this(q.getId(), q.getOwnerId(), q.getAuctionId(), q.getMessage(), q.getReply());
     }
 
+    public QuestionDAO(){}
+
     public String get_rid() {
         return this._rid;
     }
@@ -79,7 +81,7 @@ public class QuestionDAO {
     @Override
     public String toString() {
         return "Question [id = " + id + "\n ownerId = " + ownerId + "\n auctionId = " + auctionId + "\n message = "
-                + message + "\n replies = " + reply.toString() + "]";
+                + message + "\n replies = " + reply + "]";
     }
 
 }
