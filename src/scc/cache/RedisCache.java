@@ -1,5 +1,9 @@
 package scc.cache;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Cookie;
 import redis.clients.jedis.Jedis;
@@ -12,6 +16,8 @@ import scc.srv.MainApplication;
 public class RedisCache {
 
 	private static JedisPool instance;
+	private static final String USERS = "users";
+	private static final String AUCTIONS = "auctions";
 
 	public synchronized static JedisPool getCachePool() {
 		if (instance != null)
@@ -25,7 +31,8 @@ public class RedisCache {
 		poolConfig.setTestWhileIdle(true);
 		poolConfig.setNumTestsPerEvictionRun(3);
 		poolConfig.setBlockWhenExhausted(true);
-		instance = new JedisPool(poolConfig, MainApplication.REDIS_HOSTNAME, 6380, 1000, MainApplication.REDIS_KEY, true);
+		instance = new JedisPool(poolConfig, MainApplication.REDIS_HOSTNAME, 6380, 1000, MainApplication.REDIS_KEY,
+				true);
 		return instance;
 
 	}
@@ -47,20 +54,81 @@ public class RedisCache {
 		} catch (Exception e) {
 			throw new JedisException("Error in get cookie!");
 		}
-		if (value == null ||  value.length() == 0)
+		if (value == null || value.length() == 0)
 			throw new NotAuthorizedException("No valid session initialized 2");
 		if (!value.equals(id) && !value.equals("admin"))
 			throw new NotAuthorizedException("Invalid user : " + value);
 		return value;
 	}
 
-	public synchronized static long deleteKey(String key){
+	public synchronized static List<String> getUsers() {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-			return jedis.del(key);
+			return jedis.hvals(USERS);
+		} catch (Exception e) {
+			throw new JedisException("Error when getting key!");
+		}
+	}
+
+	public synchronized static List<String> getAuctions() {
+		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			return jedis.hvals(AUCTIONS);
+		} catch (Exception e) {
+			throw new JedisException("Error when getting key!");
+		}
+	}
+
+	public synchronized static String deleteUser(String key) {
+		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			String value = jedis.hget(USERS, key);
+			jedis.hdel(USERS, key);
+			return value;
 		} catch (Exception e) {
 			throw new JedisException("Error when deleting key!");
 		}
 	}
 
+	public synchronized static String deleteAuction(String key) {
+		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			String value = jedis.hget(AUCTIONS, key);
+			jedis.hdel(AUCTIONS, key);
+			return value;
+		} catch (Exception e) {
+			throw new JedisException("Error when deleting key!");
+		}
+	}
+
+	public synchronized static String putUser(String key, String value) {
+		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			jedis.hset(USERS, Map.of(key, value));
+			return value;
+		} catch (Exception e) {
+			throw new JedisException("Error when setting key and value!");
+		}
+	}
+
+	public synchronized static String putAuction(String key, String value) {
+		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			jedis.hset(AUCTIONS, Map.of(key, value));
+			return value;
+		} catch (Exception e) {
+			throw new JedisException("Error when setting key and value!");
+		}
+	}
+
+	public synchronized static boolean userExists(String key) {
+		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			return jedis.hexists(USERS, key);
+		} catch (Exception e) {
+			throw new JedisException("Error when checking key!");
+		}
+	}
+
+	public synchronized static boolean auctionExists(String key) {
+		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			return jedis.hexists(AUCTIONS, key);
+		} catch (Exception e) {
+			throw new JedisException("Error when checking key!");
+		}
+	}
 
 }

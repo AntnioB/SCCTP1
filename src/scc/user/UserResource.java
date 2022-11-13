@@ -75,6 +75,7 @@ public class UserResource {
         if (statusCode > 300)
             throw new WebApplicationException(statusCode);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        RedisCache.putUser(user.getId(), user.toString());
         String json = ow.writeValueAsString(res.getItem().toUser());
         return json;
     }
@@ -92,6 +93,7 @@ public class UserResource {
             int resStatus = res.getStatusCode();
             if (resStatus > 300)
                 throw new WebApplicationException(resStatus);
+            RedisCache.deleteUser(id);
             return String.valueOf(res.getStatusCode());
         } catch (WebApplicationException e) {
             throw e;
@@ -119,6 +121,7 @@ public class UserResource {
                 throw new WebApplicationException(statusCode);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toUser());
+            RedisCache.putUser(user.getId(), json);
             return json;
         } catch (WebApplicationException e) {
             throw e;

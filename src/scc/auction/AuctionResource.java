@@ -2,6 +2,7 @@ package scc.auction;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,7 +42,6 @@ public class AuctionResource {
 
         try {
             RedisCache.checkCookieUser(session, auction.getOwnerId());
-
             ObjectMapper om = new ObjectMapper()
                     .registerModule(new JavaTimeModule());
             ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
@@ -56,6 +56,7 @@ public class AuctionResource {
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
 
+            RedisCache.putAuction(auction.getId(), auction.toString());
             String json = ow.writeValueAsString(res.getItem().toAuction());
             return json;
         } catch (WebApplicationException e) {
@@ -72,17 +73,13 @@ public class AuctionResource {
             String ownerId) {
         try {
             RedisCache.checkCookieUser(session, ownerId);
-
-            try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-                jedis.del(id);
-            }
             CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
             CosmosItemResponse<Object> res = db.delAuctionById(id);
             int resStatus = res.getStatusCode();
             if (resStatus > 300)
                 throw new WebApplicationException(resStatus);
-            String value = String.valueOf(res.getStatusCode());
-            return value;
+            RedisCache.deleteAuction(id);
+            return String.valueOf(res.getStatusCode());
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -99,7 +96,6 @@ public class AuctionResource {
 
         try {
             RedisCache.checkCookieUser(session, auction.getOwnerId());
-            
             CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
             if (!auctionExists(auction.getId(), db))
                 throw new WebApplicationException("Auction not found", 404);
@@ -109,6 +105,7 @@ public class AuctionResource {
                 throw new WebApplicationException(statusCode);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toAuction());
+            RedisCache.putAuction(auction.getId(), json);
             return json;
         } catch (WebApplicationException e) {
             throw e;
