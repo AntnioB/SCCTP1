@@ -39,10 +39,10 @@ public class BidResource {
 
         bid.setId(UUID.randomUUID().toString());
 
-        Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(bid.getBidderId()).iterator();
-
-        if (!ite.hasNext())
-            throw new NotFoundException("User does not exist");
+        if (!RedisCache.userExists(bid.getBidderId())) {
+            if (!CosmosDBLayer.getInstance().getUserById(bid.getBidderId()).iterator().hasNext())
+                throw new NotFoundException("User does not exist");
+        }
 
         try {
             RedisCache.checkCookieUser(session, bid.getBidderId());
@@ -60,7 +60,10 @@ public class BidResource {
                     minBidAmount = auction.getMinPrice();
                 } else {
                     CosmosDBAuctionLayer auctionDB = CosmosDBAuctionLayer.getInstance();
-                    minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
+                    if (auctionDB.getAuctionById(auctionId).iterator().hasNext())
+                        minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
+                    else
+                        throw new NotFoundException("Auction does not exist");
                 }
             }
             if (bid.getAmount() <= minBidAmount)

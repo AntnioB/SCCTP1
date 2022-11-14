@@ -9,6 +9,7 @@ import jakarta.ws.rs.WebApplicationException;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
@@ -36,7 +37,7 @@ public class UserResource {
     @POST
     @Path("/auth")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response auth(Login login) {
+    public Response auth(Login login) throws JsonMappingException, JsonProcessingException {
 
         boolean pwdOk = login.authenticate();
 

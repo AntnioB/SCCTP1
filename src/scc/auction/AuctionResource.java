@@ -41,11 +41,12 @@ public class AuctionResource {
             ObjectMapper om = new ObjectMapper()
                     .registerModule(new JavaTimeModule());
             ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
-            Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator();
-            if (!ite.hasNext())
-                throw new WebApplicationException("User does not exist",404);
+            if (!RedisCache.userExists(auction.getOwnerId())) {
+                if (!CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator().hasNext())
+                    throw new WebApplicationException("User does not exist", 404);
+            }
             if (auction.getEndTime().isBefore(ZonedDateTime.now()))
-                throw new WebApplicationException("Prohibited Time",403);
+                throw new WebApplicationException("Prohibited Time", 403);
             CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(new AuctionDAO(auction));
             int statusCode = res.getStatusCode();
             if (statusCode > 300)
