@@ -42,9 +42,10 @@ public class AuctionResource {
             ObjectMapper om = new ObjectMapper()
                     .registerModule(new JavaTimeModule());
             ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
-            Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator();
-            if (!ite.hasNext())
-                throw new NotFoundException("User does not exist");
+            if (!RedisCache.userExists(auction.getOwnerId())) {
+                if (!CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator().hasNext())
+                    throw new NotFoundException("User does not exist");
+            }
             if (auction.getEndTime().isBefore(ZonedDateTime.now()))
                 return "Prohibited Time";
             CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(new AuctionDAO(auction));
