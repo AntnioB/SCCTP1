@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.azure.cosmos.models.CosmosItemResponse;
+import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -127,14 +128,7 @@ public class AuctionResource {
         return res.toString();
     }
 
-    private boolean auctionExists(String id, CosmosDBAuctionLayer db) {
-        Optional<AuctionDAO> res = db.getAuctions().stream()
-                .filter(auction -> auction.getId().equals(id)).findFirst();
-        return res.isPresent();
-    }
-
-
-    //TODO just for testing purposes need to delete
+    // TODO just for testing purposes need to delete
     @DELETE
     @Path("/delete")
     @Produces(MediaType.TEXT_PLAIN)
@@ -145,6 +139,13 @@ public class AuctionResource {
             db.delAuction(ite.next());
         }
         return "200";
+    }
+
+    private boolean auctionExists(String id, CosmosDBAuctionLayer db) {
+        if (RedisCache.auctionExists(id))
+            return true;
+        CosmosPagedIterable<AuctionDAO> res = db.getAuctionById(id);
+        return res.iterator().hasNext();
     }
 
 }

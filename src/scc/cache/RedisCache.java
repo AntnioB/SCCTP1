@@ -6,6 +6,7 @@ import java.util.Set;
 
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.NewCookie;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -51,27 +52,36 @@ public class RedisCache {
 		String value;
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			value = jedis.get(session.getValue());
+			if (value == null || value.length() == 0)
+				throw new NotAuthorizedException("No valid session initialized 2");
+			if (!value.equals(id) && !value.equals("admin"))
+				throw new NotAuthorizedException("Invalid user : " + value);
+			NewCookie cookie = new NewCookie.Builder("scc:session")
+					.value(session.getValue())
+					.path("/")
+					.comment("sessionid")
+					.maxAge(300)
+					.secure(false)
+					.httpOnly(true)
+					.build();
+			putCookie(cookie.getValue(), id);
 		} catch (Exception e) {
 			throw new JedisException("Error in get cookie!");
 		}
-		if (value == null || value.length() == 0)
-			throw new NotAuthorizedException("No valid session initialized 2");
-		if (!value.equals(id) && !value.equals("admin"))
-			throw new NotAuthorizedException("Invalid user : " + value);
 		return value;
 	}
 
-	public synchronized static List<String> getUsers() {
+	public synchronized static String getUser(String id) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-			return jedis.hvals(USERS);
+			return jedis.hget(USERS, id);
 		} catch (Exception e) {
 			throw new JedisException("Error when getting key!");
 		}
 	}
 
-	public synchronized static List<String> getAuctions() {
+	public synchronized static String getAuction(String id) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-			return jedis.hvals(AUCTIONS);
+			return jedis.hget(AUCTIONS, id);
 		} catch (Exception e) {
 			throw new JedisException("Error when getting key!");
 		}
@@ -99,6 +109,7 @@ public class RedisCache {
 
 	public synchronized static String putUser(String key, String value) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			jedis.expire(key, 30);
 			jedis.hset(USERS, Map.of(key, value));
 			return value;
 		} catch (Exception e) {
@@ -108,6 +119,7 @@ public class RedisCache {
 
 	public synchronized static String putAuction(String key, String value) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			jedis.expire(key, 30);
 			jedis.hset(AUCTIONS, Map.of(key, value));
 			return value;
 		} catch (Exception e) {
