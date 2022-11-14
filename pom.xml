@@ -9,13 +9,22 @@
   <properties> 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
     <authors>57869-57854-58152</authors> 
+    <functionAppName>sccfunbackend-57869-57854-58152</functionAppName>
+    <functionAppRegion>westeurope</functionAppRegion>
+    <functionPricingTier>B1</functionPricingTier>
+    <functionResourceGroup>scc2223-rg-westeurope-58152</functionResourceGroup>
   </properties>  
   <dependencies> 
     <dependency> 
       <groupId>com.azure</groupId>  
       <artifactId>azure-storage-blob</artifactId>  
       <version>12.19.1</version> 
-    </dependency>  
+    </dependency> 
+    <dependency>
+      <groupId>com.microsoft.azure.functions</groupId>
+      <artifactId>azure-functions-java-library</artifactId>
+      <version>2.1.0</version>
+  </dependency> 
     <dependency> 
       <groupId>javax.ws.rs</groupId>  
       <artifactId>javax.ws.rs-api</artifactId>  
