@@ -1,8 +1,6 @@
 package scc.cache;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Cookie;

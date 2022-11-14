@@ -2,7 +2,6 @@ package scc.auction;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
-import java.util.Optional;
 
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;

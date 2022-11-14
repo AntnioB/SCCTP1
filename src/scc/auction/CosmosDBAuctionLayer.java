@@ -11,8 +11,8 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
-import scc.cache.RedisCache;
 import scc.srv.MainApplication;
+import scc.utils.Status;
 
 public class CosmosDBAuctionLayer {
 	private static final String CONNECTION_URL = MainApplication.CONNECTION_URL;
@@ -86,6 +86,11 @@ public class CosmosDBAuctionLayer {
 	public CosmosItemResponse<AuctionDAO> updateAuction(AuctionDAO auction) {
 		init();
 		return auctions.upsertItem(auction);
+	}
+
+	public CosmosPagedIterable<AuctionDAO> getOpenAuctions(){
+		init();
+		return auctions.queryItems("SELECT * FROM auctions WHERE auctions.status= \""+ Status.OPEN + "\"", new CosmosQueryRequestOptions(),AuctionDAO.class);
 	}
 
 	public void close() {
