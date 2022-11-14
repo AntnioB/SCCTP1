@@ -74,7 +74,7 @@ public class UserResource {
         User aux = res.getItem().toUser();
         aux.setPwd(user.getPwd());
         String json = ow.writeValueAsString(aux);
-        RedisCache.putUser(user.getId(), user.toString());
+        RedisCache.putUser(user.getId(), json);
         return json;
     }
 
@@ -137,7 +137,7 @@ public class UserResource {
         StringBuilder res = new StringBuilder();
         Iterator<UserDAO> ite = db.getUsers().iterator();
         while (ite.hasNext()) {
-            res.append(ite.next().getId() + "\n");
+            res.append(ite.next().getId() + "\n\n");
         }
         return res.toString();
     }

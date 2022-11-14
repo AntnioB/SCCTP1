@@ -7,6 +7,7 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
@@ -60,8 +61,9 @@ public class QuestionResource {
             RedisCache.checkCookieUser(session, reply.getOwnerId());
             AuctionDAO auction;
             if (RedisCache.auctionExists(auctionId)) {
-                ObjectMapper om = new ObjectMapper();
-                auction = om.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                auction = mapper.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
             } else {
                 CosmosDBAuctionLayer dba = CosmosDBAuctionLayer.getInstance();
                 auction = dba.getAuctionById(auctionId).iterator().next();
@@ -99,7 +101,7 @@ public class QuestionResource {
         QuestionDAO next;
         while (ite.hasNext()) {
             next = ite.next();
-            res.append(next.toQuestion().toString() + "\n");
+            res.append(next.toQuestion().toString() + "\n\n");
         }
         return res.toString();
     }

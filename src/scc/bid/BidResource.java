@@ -9,6 +9,8 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -20,6 +22,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import scc.auction.Auction;
 import scc.auction.AuctionDAO;
 import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
@@ -54,8 +57,9 @@ public class BidResource {
                 minBidAmount = highestBid.next().getAmount();
             else {
                 if (RedisCache.auctionExists(auctionId)) {
-                    ObjectMapper om = new ObjectMapper();
-                    AuctionDAO auction = om.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.registerModule(new JavaTimeModule());
+                    AuctionDAO auction = mapper.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
                     minBidAmount = auction.getMinPrice();
                 } else {
                     CosmosDBAuctionLayer auctionDB = CosmosDBAuctionLayer.getInstance();
@@ -88,7 +92,7 @@ public class BidResource {
         while (ite.hasNext()) {
             next = ite.next();
             if (next.getAuctionId().equals(auctionId))
-                res.append(next.toString() + "\n");
+                res.append(next.toString() + "\n\n");
         }
         return res.toString();
     }

@@ -109,8 +109,8 @@ public class RedisCache {
 
 	public synchronized static String putUser(String key, String value) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-			jedis.expire(key, 30);
 			jedis.hset(USERS, Map.of(key, value));
+			jedis.expire(key, 30);
 			return value;
 		} catch (Exception e) {
 			throw new JedisException("Error when setting key and value!");
@@ -119,8 +119,8 @@ public class RedisCache {
 
 	public synchronized static String putAuction(String key, String value) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-			jedis.expire(key, 30);
 			jedis.hset(AUCTIONS, Map.of(key, value));
+			jedis.expire(key, 30);
 			return value;
 		} catch (Exception e) {
 			throw new JedisException("Error when setting key and value!");

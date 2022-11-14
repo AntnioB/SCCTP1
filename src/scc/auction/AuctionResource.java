@@ -53,8 +53,8 @@ public class AuctionResource {
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
 
-            RedisCache.putAuction(auction.getId(), auction.toString());
             String json = ow.writeValueAsString(res.getItem().toAuction());
+            RedisCache.putAuction(auction.getId(), json);
             return json;
         } catch (WebApplicationException e) {
             throw e;
@@ -119,7 +119,7 @@ public class AuctionResource {
         StringBuilder res = new StringBuilder();
         Iterator<AuctionDAO> ite = db.getAuctions().iterator();
         while (ite.hasNext()) {
-            res.append(ite.next().toString());
+            res.append(ite.next().toString() + "\n\n");
         }
         return res.toString();
     }
