@@ -7,6 +7,7 @@ import java.util.UUID;
 import jakarta.ws.rs.WebApplicationException;
 
 import com.azure.cosmos.models.CosmosItemResponse;
+import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -45,7 +46,7 @@ public class UserResource {
                     .value(uid)
                     .path("/")
                     .comment("sessionid")
-                    .maxAge(3600)
+                    .maxAge(300)
                     .secure(false)
                     .httpOnly(true)
                     .build();
@@ -73,7 +74,7 @@ public class UserResource {
         User aux = res.getItem().toUser();
         aux.setPwd(user.getPwd());
         String json = ow.writeValueAsString(aux);
-        RedisCache.putUser(user.getId(), user.toString());
+        RedisCache.putUser(user.getId(), json);
         return json;
     }
 
@@ -136,7 +137,7 @@ public class UserResource {
         StringBuilder res = new StringBuilder();
         Iterator<UserDAO> ite = db.getUsers().iterator();
         while (ite.hasNext()) {
-            res.append(ite.next().getId() + "\n");
+            res.append(ite.next().getId() + "\n\n");
         }
         return res.toString();
     }
@@ -155,9 +156,10 @@ public class UserResource {
     }
 
     private boolean userExists(String id, CosmosDBLayer db) {
-        Optional<UserDAO> res = db.getUsers().stream()
-                .filter(user -> user.getId().equals(id)).findFirst();
-        return res.isPresent();
+        if (RedisCache.userExists(id))
+            return true;
+        CosmosPagedIterable<UserDAO> res = db.getUserById(id);
+        return res.iterator().hasNext();
     }
 
 }

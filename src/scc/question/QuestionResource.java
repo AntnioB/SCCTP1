@@ -1,12 +1,13 @@
 package scc.question;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import com.azure.cosmos.models.CosmosItemResponse;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
@@ -32,7 +33,6 @@ public class QuestionResource {
     public String createQuestion(@CookieParam("scc:session") Cookie session, Question question,
             @PathParam("auctionId") String auctionId) throws JsonProcessingException {
 
-
         try {
             RedisCache.checkCookieUser(session, question.getOwnerId());
 
@@ -46,26 +46,30 @@ public class QuestionResource {
             return json;
         } catch (WebApplicationException e) {
             throw e;
-        } 
+        }
     }
 
     @POST
     @Path("/{questionId}/reply")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createReply(@CookieParam("scc:session") Cookie session, Reply reply, @PathParam("auctionId") String auctionId,
+    public String createReply(@CookieParam("scc:session") Cookie session, Reply reply,
+            @PathParam("auctionId") String auctionId,
             @PathParam("questionId") String questionId)
             throws JsonProcessingException {
         try {
             RedisCache.checkCookieUser(session, reply.getOwnerId());
-            CosmosDBAuctionLayer dba = CosmosDBAuctionLayer.getInstance();
-            Iterator<AuctionDAO> itea = dba.getAuctionById(auctionId).iterator();
-            if(!itea.hasNext()){
-                throw new NotFoundException("Auction does not exist");
+            AuctionDAO auction;
+            if (RedisCache.auctionExists(auctionId)) {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                auction = mapper.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
+            } else {
+                CosmosDBAuctionLayer dba = CosmosDBAuctionLayer.getInstance();
+                auction = dba.getAuctionById(auctionId).iterator().next();
             }
-            AuctionDAO auction = itea.next();
-            if(!auction.getOwnerId().equals(reply.getOwnerId())){
-                throw new WebApplicationException("User and Auction Owner do not match",403);
+            if (!auction.getOwnerId().equals(reply.getOwnerId())) {
+                throw new WebApplicationException("User and Auction Owner do not match", 403);
             }
             CosmosDBQuestionLayer dbq = CosmosDBQuestionLayer.getInstance();
             Iterator<QuestionDAO> ite = dbq.getQuestionById(questionId).iterator();
@@ -82,7 +86,9 @@ public class QuestionResource {
             return json;
         } catch (WebApplicationException e) {
             throw e;
-        } 
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException("Auction does not exist");
+        }
 
     }
 
@@ -95,7 +101,7 @@ public class QuestionResource {
         QuestionDAO next;
         while (ite.hasNext()) {
             next = ite.next();
-            res.append(next.toQuestion().toString() + "\n");
+            res.append(next.toQuestion().toString() + "\n\n");
         }
         return res.toString();
     }

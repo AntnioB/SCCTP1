@@ -9,6 +9,8 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -20,6 +22,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import scc.auction.Auction;
+import scc.auction.AuctionDAO;
 import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
 import scc.user.CosmosDBLayer;
@@ -35,13 +39,11 @@ public class BidResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String createBid(@CookieParam("scc:session") Cookie session, Bid bid, @PathParam("id") String auctionId)
             throws JsonProcessingException {
-           
+
         bid.setId(UUID.randomUUID().toString());
-       
+
         Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(bid.getBidderId()).iterator();
-       
-        
-        
+
         if (!ite.hasNext())
             throw new NotFoundException("User does not exist");
 
@@ -51,30 +53,33 @@ public class BidResource {
             double minBidAmount;
             CosmosDBBidLayer bidDB = CosmosDBBidLayer.getInstance();
             Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
-            if(highestBid.hasNext())
+            if (highestBid.hasNext())
                 minBidAmount = highestBid.next().getAmount();
             else {
-                CosmosDBAuctionLayer auctionDB = CosmosDBAuctionLayer.getInstance();
-                minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
+                if (RedisCache.auctionExists(auctionId)) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.registerModule(new JavaTimeModule());
+                    AuctionDAO auction = mapper.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
+                    minBidAmount = auction.getMinPrice();
+                } else {
+                    CosmosDBAuctionLayer auctionDB = CosmosDBAuctionLayer.getInstance();
+                    minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
+                }
             }
-            if(bid.getAmount() <= minBidAmount)
+            if (bid.getAmount() <= minBidAmount)
                 throw new WebApplicationException(403);
-            
-            //here
+
             CosmosItemResponse<BidDAO> res = bidDB.putBid(new BidDAO(bid));
             int statusCode = res.getStatusCode();
-            //here
-            if (statusCode > 300){
-                //here
+            if (statusCode > 300) {
                 throw new WebApplicationException(statusCode);
             }
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            //here
             String json = ow.writeValueAsString(res.getItem().toBid());
             return json;
         } catch (WebApplicationException e) {
             throw e;
-        } 
+        }
     }
 
     @GET
@@ -87,12 +92,12 @@ public class BidResource {
         while (ite.hasNext()) {
             next = ite.next();
             if (next.getAuctionId().equals(auctionId))
-                res.append(next.toString() + "\n");
+                res.append(next.toString() + "\n\n");
         }
         return res.toString();
     }
 
-    //TODO just for testing purposes need to delete
+    // TODO just for testing purposes need to delete
     @DELETE
     @Path("/delete")
     @Produces(MediaType.TEXT_PLAIN)

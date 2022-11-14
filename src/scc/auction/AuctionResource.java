@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import com.azure.cosmos.models.CosmosItemResponse;
+import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -52,8 +53,8 @@ public class AuctionResource {
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
 
-            RedisCache.putAuction(auction.getId(), auction.toString());
             String json = ow.writeValueAsString(res.getItem().toAuction());
+            RedisCache.putAuction(auction.getId(), json);
             return json;
         } catch (WebApplicationException e) {
             throw e;
@@ -118,19 +119,12 @@ public class AuctionResource {
         StringBuilder res = new StringBuilder();
         Iterator<AuctionDAO> ite = db.getAuctions().iterator();
         while (ite.hasNext()) {
-            res.append(ite.next().toString());
+            res.append(ite.next().toString() + "\n\n");
         }
         return res.toString();
     }
 
-    private boolean auctionExists(String id, CosmosDBAuctionLayer db) {
-        Optional<AuctionDAO> res = db.getAuctions().stream()
-                .filter(auction -> auction.getId().equals(id)).findFirst();
-        return res.isPresent();
-    }
-
-
-    //TODO just for testing purposes need to delete
+    // TODO just for testing purposes need to delete
     @DELETE
     @Path("/delete")
     @Produces(MediaType.TEXT_PLAIN)
@@ -141,6 +135,13 @@ public class AuctionResource {
             db.delAuction(ite.next());
         }
         return "200";
+    }
+
+    private boolean auctionExists(String id, CosmosDBAuctionLayer db) {
+        if (RedisCache.auctionExists(id))
+            return true;
+        CosmosPagedIterable<AuctionDAO> res = db.getAuctionById(id);
+        return res.iterator().hasNext();
     }
 
 }
