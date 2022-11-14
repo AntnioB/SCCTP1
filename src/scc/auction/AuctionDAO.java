@@ -109,7 +109,7 @@ public class AuctionDAO {
 	}
 
     public Auction toAuction(){
-        return new Auction(id, title, photoId, description, ownerId, endTime, minPrice);
+        return new Auction( id,  title, photoId,  description,  ownerId, endTime, minPrice, status,  winnerBidId);
     }
 
     @Override

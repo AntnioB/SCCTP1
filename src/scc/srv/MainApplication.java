@@ -14,12 +14,12 @@ public class MainApplication extends Application
 	private Set<Object> singletons = new HashSet<Object>();
 	private Set<Class<?>> resources = new HashSet<Class<?>>();
 
-	public static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=sccstwesteurope58152;AccountKey=ioxDzZVfXVYa5pk2OAsio7KJ/GHH1q/INqqRqgJkiIIgTbK+4rg9yuU3lcmkNDh9mgxQ1A/JGBPf+ASt1WqYzQ==;EndpointSuffix=core.windows.net";
+	public static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=sccstwesteurope58152;AccountKey=XvQ4aJby4B/j1jGlIj7nq7RRvhQbebQm+rdyz5RL0qMHYgHnbK4gIyPgAFGsWpgw68+axTuXCU7F+AStdePOLg==;EndpointSuffix=core.windows.net";
 	public static final String CONNECTION_URL = "https://scc2358152.documents.azure.com:443/";
-	public static final String DB_KEY = "pk7wKpid6zxMHoE5P49anzAwZvjtw3hh3REcHauRf3ZL8R2hxsqZl6TyZei12JTo5b3AbU1RrYu3ACDbNhkXOg==";
+	public static final String DB_KEY = "FCPKbiuLmxa07dUQCmIHscHUH4k7M0JIrZo3zgRtOj2RitQ5LKLEkTOM7kmWP7oMjOmzxiTvbhfNACDbAf0HPw==";
 	public static final String DB_NAME = "scc23db58152";
 	public static final String REDIS_HOSTNAME = "rediswesteurope58152.redis.cache.windows.net";
-	public static final String REDIS_KEY= "S0fHXPd4t4cbhtBZdGIJxKXErxP1lWIWYAzCaBAftGs=";
+	public static final String REDIS_KEY= "nosNMIKFD542P5PjR1DxtCNGjnXYfRIMQAzCaCdRJcg=";
 
 	public MainApplication() {
 		resources.add(ControlResource.class);

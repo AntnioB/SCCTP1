@@ -16,6 +16,8 @@ public class QuestionDAO {
         this(q.getId(), q.getOwnerId(), q.getAuctionId(), q.getMessage(), q.getReply());
     }
 
+    public QuestionDAO(){}
+
     public String get_rid() {
         return this._rid;
     }

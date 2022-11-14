@@ -1,9 +1,9 @@
 package scc.question;
 
 import java.util.Iterator;
-import java.util.UUID;
 
 import com.azure.cosmos.models.CosmosItemResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -19,17 +19,19 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import scc.auction.AuctionDAO;
+import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
 
-@Path("/auction/{id}/question")
+@Path("/auction/{auctionId}/question")
 public class QuestionResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String createQuestion(@CookieParam("scc:session") Cookie session, Question question,
-            @PathParam("id") String id) throws JsonProcessingException {
-        question.setId(UUID.randomUUID().toString());
+            @PathParam("auctionId") String auctionId) throws JsonProcessingException {
+
 
         try {
             RedisCache.checkCookieUser(session, question.getOwnerId());
@@ -51,21 +53,27 @@ public class QuestionResource {
     @Path("/{questionId}/reply")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createReply(@CookieParam("scc:session") Cookie session, String reply, @PathParam("id") String id,
+    public String createReply(@CookieParam("scc:session") Cookie session, Reply reply, @PathParam("auctionId") String auctionId,
             @PathParam("questionId") String questionId)
             throws JsonProcessingException {
-
-                //TODO o gajo que faz a reply kinda devia ser o dono to auction e nao o toni da estacao 
         try {
-            RedisCache.checkCookieUser(session, id);
-            
-            CosmosDBQuestionLayer db = CosmosDBQuestionLayer.getInstance();
-            Iterator<QuestionDAO> ite = db.getQuestionById(questionId).iterator();
+            RedisCache.checkCookieUser(session, reply.getOwnerId());
+            CosmosDBAuctionLayer dba = CosmosDBAuctionLayer.getInstance();
+            Iterator<AuctionDAO> itea = dba.getAuctionById(auctionId).iterator();
+            if(!itea.hasNext()){
+                throw new NotFoundException("Auction does not exist");
+            }
+            AuctionDAO auction = itea.next();
+            if(!auction.getOwnerId().equals(reply.getOwnerId())){
+                throw new WebApplicationException("User and Auction Owner do not match",403);
+            }
+            CosmosDBQuestionLayer dbq = CosmosDBQuestionLayer.getInstance();
+            Iterator<QuestionDAO> ite = dbq.getQuestionById(questionId).iterator();
             if (!ite.hasNext())
                 throw new NotFoundException("Question does not exist");
             Question question = ite.next().toQuestion();
-            question.setReply(reply);
-            CosmosItemResponse<QuestionDAO> res = db.updateQuestion(question);
+            question.setReply(reply.toString());
+            CosmosItemResponse<QuestionDAO> res = dbq.updateQuestion(question);
             int statusCode = res.getStatusCode();
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
@@ -80,10 +88,10 @@ public class QuestionResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String listQuestions(@PathParam("id") String id) throws JsonProcessingException {
+    public String listQuestions(@PathParam("auctionId") String auctionId) throws JsonProcessingException {
         CosmosDBQuestionLayer db = CosmosDBQuestionLayer.getInstance();
         StringBuilder res = new StringBuilder();
-        Iterator<QuestionDAO> ite = db.getQuestionsByAuctionId(id).iterator();
+        Iterator<QuestionDAO> ite = db.getQuestionsByAuctionId(auctionId).iterator();
         QuestionDAO next;
         while (ite.hasNext()) {
             next = ite.next();
