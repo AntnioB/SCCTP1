@@ -115,6 +115,6 @@ public class AuctionDAO {
     @Override
 	public String toString() {
 		return "AuctionDAO [_rid=" + _rid + ", _ts=" + _ts + ", id=" +  id + ", title=" + title + ", description=" + description + ", photoId=" + photoId + ", owner="
-				+ ownerId+ ", endTime="+ endTime.toString()+ ", minPrice=" + minPrice + ", status= "+status.toString()+"winnerBid="+winnerBidId+"]";
+				+ ownerId+ ", endTime="+ endTime.toString()+ ", minPrice=" + minPrice + ", status= "+status.toString()+" winnerBid="+winnerBidId+"]";
 	}
 }

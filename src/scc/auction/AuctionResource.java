@@ -15,7 +15,6 @@ import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -44,9 +43,9 @@ public class AuctionResource {
             ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
             Iterator<UserDAO> ite = CosmosDBLayer.getInstance().getUserById(auction.getOwnerId()).iterator();
             if (!ite.hasNext())
-                throw new NotFoundException("User does not exist");
+                throw new WebApplicationException("User does not exist",404);
             if (auction.getEndTime().isBefore(ZonedDateTime.now()))
-                return "Prohibited Time";
+                throw new WebApplicationException("Prohibited Time",403);
             CosmosItemResponse<AuctionDAO> res = CosmosDBAuctionLayer.getInstance().putAuction(new AuctionDAO(auction));
             int statusCode = res.getStatusCode();
             if (statusCode > 300)
@@ -57,8 +56,6 @@ public class AuctionResource {
             return json;
         } catch (WebApplicationException e) {
             throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e);
         }
     }
 
