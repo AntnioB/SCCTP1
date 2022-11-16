@@ -30,6 +30,7 @@ import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.Response;
 import scc.cache.RedisCache;
 import scc.utils.Hash;
+import scc.utils.UniqueId;
 
 @Path("/user")
 public class UserResource {
@@ -61,7 +62,7 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String createUser(User user) throws JsonProcessingException {
-
+        user.setId(UniqueId.randomUUID(user.getId()));
         UserDAO tmp = new UserDAO(user);
         tmp.setPwd(Hash.of(user.getPwd()));
         CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(tmp);
