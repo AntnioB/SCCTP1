@@ -44,7 +44,7 @@ public class RedisCache {
 		}
 	}
 
-	public synchronized static String checkCookieUser(Cookie session, String id) throws NotAuthorizedException {
+	public synchronized static NewCookie checkCookieUser(Cookie session, String id) throws NotAuthorizedException {
 		if (session == null || session.getValue() == null)
 			throw new NotAuthorizedException("No session initialized 1");
 		String value;
@@ -63,10 +63,10 @@ public class RedisCache {
 					.httpOnly(true)
 					.build();
 			putCookie(cookie.getValue(), id);
+			return cookie;
 		} catch (Exception e) {
 			throw new JedisException("Error in get cookie!");
 		}
-		return value;
 	}
 
 	public synchronized static String getUser(String id) {

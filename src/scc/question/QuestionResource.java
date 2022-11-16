@@ -20,6 +20,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
 import scc.auction.AuctionDAO;
 import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
@@ -30,11 +32,11 @@ public class QuestionResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createQuestion(@CookieParam("scc:session") Cookie session, Question question,
+    public Response createQuestion(@CookieParam("scc:session") Cookie session, Question question,
             @PathParam("auctionId") String auctionId) throws JsonProcessingException {
 
         try {
-            RedisCache.checkCookieUser(session, question.getOwnerId());
+            NewCookie cookie = RedisCache.checkCookieUser(session, question.getOwnerId());
 
             CosmosDBQuestionLayer db = CosmosDBQuestionLayer.getInstance();
             CosmosItemResponse<QuestionDAO> res = db.putQuestion(new QuestionDAO(question));
@@ -43,7 +45,7 @@ public class QuestionResource {
                 throw new WebApplicationException(statusCode);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toQuestion());
-            return json;
+            return Response.ok(json,MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
             throw e;
         }
@@ -53,12 +55,12 @@ public class QuestionResource {
     @Path("/{questionId}/reply")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createReply(@CookieParam("scc:session") Cookie session, Reply reply,
+    public Response createReply(@CookieParam("scc:session") Cookie session, Reply reply,
             @PathParam("auctionId") String auctionId,
             @PathParam("questionId") String questionId)
             throws JsonProcessingException {
         try {
-            RedisCache.checkCookieUser(session, reply.getOwnerId());
+            NewCookie cookie = RedisCache.checkCookieUser(session, reply.getOwnerId());
             AuctionDAO auction;
             if (RedisCache.auctionExists(auctionId)) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -83,7 +85,7 @@ public class QuestionResource {
                 throw new WebApplicationException(statusCode);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toQuestion());
-            return json;
+            return Response.ok(json,MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
             throw e;
         } catch (NoSuchElementException e) {

@@ -20,6 +20,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
 import scc.auction.AuctionDAO;
 import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
@@ -34,7 +36,7 @@ public class BidResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createBid(@CookieParam("scc:session") Cookie session, Bid bid, @PathParam("id") String auctionId)
+    public Response createBid(@CookieParam("scc:session") Cookie session, Bid bid, @PathParam("id") String auctionId)
             throws JsonProcessingException {
 
         bid.setId(UUID.randomUUID().toString());
@@ -45,7 +47,7 @@ public class BidResource {
         }
 
         try {
-            RedisCache.checkCookieUser(session, bid.getBidderId());
+            NewCookie cookie = RedisCache.checkCookieUser(session, bid.getBidderId());
 
             double minBidAmount;
             CosmosDBBidLayer bidDB = CosmosDBBidLayer.getInstance();
@@ -76,7 +78,7 @@ public class BidResource {
             }
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toBid());
-            return json;
+            return Response.ok(json,MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
             throw e;
         }
