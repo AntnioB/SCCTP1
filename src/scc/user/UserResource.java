@@ -63,7 +63,6 @@ public class UserResource {
     public String createUser(User user) throws JsonProcessingException {
 
         UserDAO tmp = new UserDAO(user);
-        tmp.setId(UUID.randomUUID().toString());
         tmp.setPwd(Hash.of(user.getPwd()));
         CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(tmp);
         int statusCode = res.getStatusCode();

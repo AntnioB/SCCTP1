@@ -2,6 +2,8 @@ package scc.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import scc.utils.UniqueId;
+
 /**
  * Represents a User, as returned to the clients
  */
@@ -11,7 +13,7 @@ public class User {
 	private String pwd;
 	private String photoId;
 	public User(@JsonProperty("id") String id,@JsonProperty("name") String name,@JsonProperty("pwd") String pwd,@JsonProperty("photoId") String photoId) {
-		this.id = id;
+		this.id = UniqueId.randomUUID(id);
 		this.name = name;
 		this.pwd = pwd;
 		this.photoId = photoId;
