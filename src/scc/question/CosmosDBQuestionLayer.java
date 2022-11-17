@@ -74,9 +74,16 @@ public class CosmosDBQuestionLayer {
 				QuestionDAO.class);
 	}
 
-	public CosmosItemResponse<QuestionDAO> updateQuestion(Question question) {
+	public CosmosPagedIterable<QuestionDAO> getQuestionsByOwnerId(String ownerId) {
 		init();
-		return questions.upsertItem(new QuestionDAO(question));
+		return questions.queryItems("SELECT * FROM questions WHERE questions.ownerId=\"" + ownerId + "\"",
+				new CosmosQueryRequestOptions(),
+				QuestionDAO.class);
+	}
+
+	public CosmosItemResponse<QuestionDAO> updateQuestion(QuestionDAO question) {
+		init();
+		return questions.upsertItem(question);
 	}
 
 	public void close() {

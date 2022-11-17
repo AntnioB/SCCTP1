@@ -28,7 +28,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.Response;
+import scc.auction.AuctionDAO;
+import scc.auction.CosmosDBAuctionLayer;
+import scc.bid.BidDAO;
+import scc.bid.CosmosDBBidLayer;
 import scc.cache.RedisCache;
+import scc.question.CosmosDBQuestionLayer;
+import scc.question.QuestionDAO;
 import scc.utils.Hash;
 import scc.utils.UniqueId;
 
@@ -93,6 +99,24 @@ public class UserResource {
             int resStatus = res.getStatusCode();
             if (resStatus > 300)
                 throw new WebApplicationException(resStatus);
+            CosmosDBAuctionLayer dbauctions = CosmosDBAuctionLayer.getInstance();
+            CosmosPagedIterable<AuctionDAO> auctions = dbauctions.getAuctionByOwnerId(id);
+            for (AuctionDAO auctionDAO : auctions) {
+                auctionDAO.setOwnerId("Deleted User");
+                dbauctions.updateAuction(auctionDAO);
+            }
+            CosmosDBBidLayer dbbids = CosmosDBBidLayer.getInstance();
+            CosmosPagedIterable<BidDAO> bids = dbbids.getBidByBidderId(id);
+            for (BidDAO bidDAO : bids) {
+                bidDAO.setBidderId("Deleted User");
+                dbbids.updateBid(bidDAO);
+            }
+            CosmosDBQuestionLayer dbquestions = CosmosDBQuestionLayer.getInstance();
+            CosmosPagedIterable<QuestionDAO> questions = dbquestions.getQuestionsByOwnerId(id);
+            for (QuestionDAO questionDAO : questions) {
+                questionDAO.setOwnerID("Deleted User");
+                dbquestions.updateQuestion(questionDAO);
+            }
             RedisCache.deleteUser(id);
             return String.valueOf(res.getStatusCode());
         } catch (WebApplicationException e) {
