@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.ws.rs.core.Application;
 import scc.auction.AuctionResource;
 import scc.bid.BidResource;
+import scc.media.MediaResource;
 import scc.question.QuestionResource;
 import scc.user.UserResource;
 import scc.utils.GenericExceptionMapper;
