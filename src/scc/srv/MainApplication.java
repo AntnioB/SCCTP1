@@ -8,6 +8,7 @@ import scc.auction.AuctionResource;
 import scc.bid.BidResource;
 import scc.question.QuestionResource;
 import scc.user.UserResource;
+import scc.utils.GenericExceptionMapper;
 
 public class MainApplication extends Application
 {
@@ -28,6 +29,7 @@ public class MainApplication extends Application
 		resources.add(AuctionResource.class);
 		resources.add(BidResource.class);
 		resources.add(QuestionResource.class);
+		resources.add(GenericExceptionMapper.class);
 		singletons.add( new MediaResource());	
 	}
 
