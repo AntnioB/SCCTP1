@@ -11,8 +11,7 @@ import scc.question.QuestionResource;
 import scc.user.UserResource;
 import scc.utils.GenericExceptionMapper;
 
-public class MainApplication extends Application
-{
+public class MainApplication extends Application {
 	private Set<Object> singletons = new HashSet<Object>();
 	private Set<Class<?>> resources = new HashSet<Class<?>>();
 
@@ -21,7 +20,10 @@ public class MainApplication extends Application
 	public static final String DB_KEY = "Lz27NP1VmRREZJOOKAnYIbtD2AGbpwxpTnXwxnYyGRiEwxeUbjsAw4OOfDDkFSUpDGqdW0wYQc6bACDb0N4DTQ==";
 	public static final String DB_NAME = "scc23db58152";
 	public static final String REDIS_HOSTNAME = "rediswesteurope58152.redis.cache.windows.net";
-	public static final String REDIS_KEY= "jJm1HZsPQgqChx53LXKNZI2sAwTyu3xVgAzCaOkipTs=" ;
+	public static final String REDIS_KEY = "jJm1HZsPQgqChx53LXKNZI2sAwTyu3xVgAzCaOkipTs=";
+	public static final String SEARCH_PROP_FILE = "search-azurekeys-westeurope.props";
+	public static final String PROP_SERVICE_NAME = "scc23cs58152";
+	public static final String PROP_QUERY_KEY = "DBt6oSQr98R3xkdJbqTy6AuHfpAioWWacOI0Gt7ah9AzSeAE878e";
 
 	public MainApplication() {
 		resources.add(ControlResource.class);
@@ -31,7 +33,7 @@ public class MainApplication extends Application
 		resources.add(BidResource.class);
 		resources.add(QuestionResource.class);
 		resources.add(GenericExceptionMapper.class);
-		singletons.add( new MediaResource());	
+		singletons.add(new MediaResource());
 	}
 
 	@Override
