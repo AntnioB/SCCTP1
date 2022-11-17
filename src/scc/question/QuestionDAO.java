@@ -42,7 +42,7 @@ public class QuestionDAO {
         this.id = id;
     }
 
-    public String getOwnerID() {
+    public String getOwnerId() {
         return this.ownerId;
     }
 

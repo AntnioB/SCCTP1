@@ -78,6 +78,12 @@ public class CosmosDBAuctionLayer {
 				new CosmosQueryRequestOptions(), AuctionDAO.class);
 	}
 
+	public CosmosPagedIterable<AuctionDAO> getAuctionByOwnerId(String ownerId) {
+		init();
+		return auctions.queryItems("SELECT * FROM auctions WHERE auctions.ownerId=\"" + ownerId + "\"",
+				new CosmosQueryRequestOptions(), AuctionDAO.class);
+	}
+
 	public CosmosPagedIterable<AuctionDAO> getAuctions() {
 		init();
 		return auctions.queryItems("SELECT * FROM auctions ", new CosmosQueryRequestOptions(), AuctionDAO.class);

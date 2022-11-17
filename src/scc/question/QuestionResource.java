@@ -77,7 +77,7 @@ public class QuestionResource {
             Iterator<QuestionDAO> ite = dbq.getQuestionById(questionId).iterator();
             if (!ite.hasNext())
                 throw new NotFoundException("Question does not exist");
-            Question question = ite.next().toQuestion();
+            QuestionDAO question = ite.next();
             question.setReply(reply.toString());
             CosmosItemResponse<QuestionDAO> res = dbq.updateQuestion(question);
             int statusCode = res.getStatusCode();

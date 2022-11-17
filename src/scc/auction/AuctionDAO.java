@@ -80,6 +80,10 @@ public class AuctionDAO {
         return ownerId;
     }
 
+	public void setOwnerId(String ownerId){
+		this.ownerId = ownerId;
+	}
+
     public ZonedDateTime getEndTime(){
         return endTime;
     }
