@@ -1,7 +1,5 @@
 package scc.question;
 
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import scc.utils.UniqueId;

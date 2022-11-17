@@ -95,12 +95,11 @@ public class BidResource {
     public String listBids(@PathParam("id") String auctionId) {
         CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
         StringBuilder res = new StringBuilder();
-        Iterator<BidDAO> ite = db.getBids().iterator();
+        Iterator<BidDAO> ite = db.getBidByAuctionId(auctionId).iterator();
         BidDAO next;
         while (ite.hasNext()) {
             next = ite.next();
-            if (next.getAuctionId().equals(auctionId))
-                res.append(next.toString() + "\n\n");
+            res.append(next.toString() + "\n\n");
         }
         return res.toString();
     }

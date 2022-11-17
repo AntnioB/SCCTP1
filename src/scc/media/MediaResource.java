@@ -1,6 +1,5 @@
 package scc.media;
 
-import scc.cache.RedisCache;
 import scc.srv.MainApplication;
 import scc.utils.Hash;
 
@@ -9,16 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 
 import com.azure.core.util.BinaryData;
@@ -57,15 +53,14 @@ public class MediaResource {
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response upload(@CookieParam("scc:session") Cookie session, String ownerId, byte[] contents) throws JsonProcessingException {
-		NewCookie cookie = RedisCache.checkCookieUser(session, ownerId);
+	public Response upload(byte[] contents) throws JsonProcessingException {
 
-		String key = Hash.of(Hash.of(contents) + ownerId);
+		String key = Hash.of(contents);
 		BlobClient blob = getContainerClient().getBlobClient(key);
 		blob.upload(BinaryData.fromBytes(contents), true);
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(key);
-		return Response.ok(json,MediaType.APPLICATION_JSON).cookie(cookie).build();
+		return Response.ok(json,MediaType.APPLICATION_JSON).build();
 	}
 
 	/**
@@ -75,14 +70,13 @@ public class MediaResource {
 	@GET
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response download(@CookieParam("scc:session") Cookie session, @PathParam("id") String photoId, String ownerId) {
-		NewCookie cookie = RedisCache.checkCookieUser(session, ownerId);
+	public Response download(@PathParam("id") String photoId, String ownerId) {
 		
 		BlobClient blob = getContainerClient().getBlobClient(photoId);
 		if (!blob.exists())
 			throw new NotFoundException();
 		BinaryData data = blob.downloadContent();
-		return Response.ok(data.toBytes(),MediaType.APPLICATION_OCTET_STREAM).cookie(cookie).build();
+		return Response.ok(data.toBytes(),MediaType.APPLICATION_OCTET_STREAM).build();
 	}
 
 	/**

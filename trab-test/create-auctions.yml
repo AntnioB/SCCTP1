@@ -39,7 +39,7 @@ scenarios:
             beforeRequest: "uploadImageBody"
             capture: 
               regexp: "(.+)"
-              as: "photoId"              # capture the reply as image id to be used in uction creation
+              as: "imageId"              # capture the reply as image id to be used in uction creation
         - post:                          # Create auction
             url: "/auction"
             name: "POST:/auction"
@@ -47,19 +47,17 @@ scenarios:
               Content-Type: application/json
               Accept: application/json
             json:
-              id: "{{id}}"
               description: "{{ description }}"
               title: "{{ title }}"
-              ownerId: "{{ owner }}"
-              photoId: "{{ imageId }}"
+              owner: "{{ ownerId }}"
+              imageId: "{{ photoId }}"
               endTime: "{{ endTime }}"
-              minPrice: "{{ minimumPrice }}"
-              status: "{{ status }}"
+              minimumPrice: "{{ minPrice }}"
             capture:                     # Capturing auction id and store it in variable auctionId
               - json: $.id
                 as: "auctionId"
               - json: $.owner
-                as: "ownerId"
+                as: "auctionUser"
         - loop:                          # Let's add numBids bids to the auction
           - function: "selectUserSkewed"
           - function: "genNewBid"
@@ -79,8 +77,8 @@ scenarios:
                 Accept: application/json
               json:
                 auctionId: "{{ auctionId }}"
-                bidderId: "{{ usser }}"
-                amount: "{{ value }}"
+                user: "{{ user }}"
+                value: "{{ value }}"
           count: "{{ numBids }}"   
         - loop:                          # Let's add numQuestions questions to the auction
           - function: "selectUserSkewed"
@@ -101,8 +99,8 @@ scenarios:
                 Accept: application/json
               json:
                 auctionId: "{{ auctionId }}"
-                ownerId: "{{ user }}"
-                message: "{{ text }}"
+                user: "{{ user }}"
+                text: "{{ text }}"
               capture:                     # Capturing question id and store it in variable questionId
                 - json: $.id
                   as: "questionId"
@@ -123,9 +121,7 @@ scenarios:
                 Content-Type: application/json
                 Accept: application/json
               json:
-                ownerId: "{{ ownerId}}"
-                questionId: "{{ questionId}}"
-                message: "{{ message }}"
+                reply: "{{ reply }}"
               ifTrue: "reply"
           count: "{{ numQuestions }}"   
         count: "{{ numAuctions }}"
