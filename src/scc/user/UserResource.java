@@ -71,11 +71,12 @@ public class UserResource {
             throw new WebApplicationException(statusCode);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
-        // TODO kinda trash
+        // TODO Imprimir json om pass hashed
         User aux = res.getItem().toUser();
+        String jsonPrime = ow.writeValueAsString(aux);
         aux.setPwd(user.getPwd());
         String json = ow.writeValueAsString(aux);
-        RedisCache.putUser(user.getId(), json);
+        RedisCache.putUser(user.getId(), jsonPrime);
         return json;
     }
 
