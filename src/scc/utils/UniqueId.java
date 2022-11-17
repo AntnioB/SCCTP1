@@ -7,6 +7,10 @@ public class UniqueId {
         return id + "-" + UUID.randomUUID().toString().replace("-","");
     }
 
+    public static String auctionId(){
+        return "auction-" + UUID.randomUUID().toString().replace("-","");
+    }
+
     public static String bidId(String id, int num){
         return "bid-" + num + "-" + id;
     }

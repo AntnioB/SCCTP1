@@ -21,10 +21,10 @@ public class Auction {
 	private Status status;
 	private String winnerBidId;
 
-    public Auction(@JsonProperty("id") String id, @JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
+    public Auction(@JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
      @JsonProperty("description") String description, @JsonProperty("ownerId") String ownerId,
      @JsonProperty("endTime") ZonedDateTime endTime, @JsonProperty("minPrice") double minPrice){
-		this.id = UniqueId.randomUUID(id);
+		this.id = UniqueId.auctionId();
 		this.title = title;
 		this.description = description;
 		this.photoId = photoId;
