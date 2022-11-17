@@ -9,8 +9,7 @@ import scc.bid.BidResource;
 import scc.question.QuestionResource;
 import scc.user.UserResource;
 
-public class MainApplication extends Application
-{
+public class MainApplication extends Application {
 	private Set<Object> singletons = new HashSet<Object>();
 	private Set<Class<?>> resources = new HashSet<Class<?>>();
 
@@ -19,7 +18,10 @@ public class MainApplication extends Application
 	public static final String DB_KEY = "FCPKbiuLmxa07dUQCmIHscHUH4k7M0JIrZo3zgRtOj2RitQ5LKLEkTOM7kmWP7oMjOmzxiTvbhfNACDbAf0HPw==";
 	public static final String DB_NAME = "scc23db58152";
 	public static final String REDIS_HOSTNAME = "rediswesteurope58152.redis.cache.windows.net";
-	public static final String REDIS_KEY= "nosNMIKFD542P5PjR1DxtCNGjnXYfRIMQAzCaCdRJcg=";
+	public static final String REDIS_KEY = "nosNMIKFD542P5PjR1DxtCNGjnXYfRIMQAzCaCdRJcg=";
+	public static final String SEARCH_PROP_FILE = "search-azurekeys-westeurope.props";
+	public static final String PROP_SERVICE_NAME = "scc23cs58152";
+	public static final String PROP_QUERY_KEY = "DBt6oSQr98R3xkdJbqTy6AuHfpAioWWacOI0Gt7ah9AzSeAE878e";
 
 	public MainApplication() {
 		resources.add(ControlResource.class);
@@ -28,7 +30,7 @@ public class MainApplication extends Application
 		resources.add(AuctionResource.class);
 		resources.add(BidResource.class);
 		resources.add(QuestionResource.class);
-		singletons.add( new MediaResource());	
+		singletons.add(new MediaResource());
 	}
 
 	@Override
