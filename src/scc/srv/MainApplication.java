@@ -20,7 +20,7 @@ public class MainApplication extends Application
 	public static final String DB_KEY = "Lz27NP1VmRREZJOOKAnYIbtD2AGbpwxpTnXwxnYyGRiEwxeUbjsAw4OOfDDkFSUpDGqdW0wYQc6bACDb0N4DTQ==";
 	public static final String DB_NAME = "scc23db58152";
 	public static final String REDIS_HOSTNAME = "rediswesteurope58152.redis.cache.windows.net";
-	public static final String REDIS_KEY= "jJm1HZsPQgqChx53LXKNZI2sAwTyu3xVgAzCaOkipTs=";
+	public static final String REDIS_KEY= "jJm1HZsPQgqChx53LXKNZI2sAwTyu3xVgAzCaOkipTs=" ;
 
 	public MainApplication() {
 		resources.add(ControlResource.class);
