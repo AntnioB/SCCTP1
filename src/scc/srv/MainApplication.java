@@ -23,7 +23,7 @@ public class MainApplication extends Application {
 	public static final String REDIS_KEY = "jJm1HZsPQgqChx53LXKNZI2sAwTyu3xVgAzCaOkipTs=";
 	public static final String SEARCH_PROP_FILE = "search-azurekeys-westeurope.props";
 	public static final String PROP_SERVICE_NAME = "scc23cs58152";
-	public static final String PROP_QUERY_KEY = "DBt6oSQr98R3xkdJbqTy6AuHfpAioWWacOI0Gt7ah9AzSeAE878e";
+	public static final String PROP_QUERY_KEY = "LgaDBNbvcofoE5e6BNj1xP9gKg2Gcu6pVuGOLWnOjkAasdzSeBa5x4P";
 
 	public MainApplication() {
 		resources.add(ControlResource.class);

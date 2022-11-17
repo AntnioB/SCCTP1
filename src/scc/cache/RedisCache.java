@@ -39,6 +39,7 @@ public class RedisCache {
 	public synchronized static void putCookie(String uuid, String userId) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			jedis.set(uuid, userId);
+			jedis.expire(uuid, 360);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -65,12 +66,13 @@ public class RedisCache {
 			putCookie(cookie.getValue(), id);
 			return cookie;
 		} catch (Exception e) {
-			throw new JedisException("Error in get cookie!");
+			throw e;
 		}
 	}
 
 	public synchronized static String getUser(String id) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			jedis.expire(id, 30);
 			return jedis.hget(USERS, id);
 		} catch (Exception e) {
 			throw new JedisException("Error when getting key!");
@@ -79,6 +81,7 @@ public class RedisCache {
 
 	public synchronized static String getAuction(String id) {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+			jedis.expire(id, 30);
 			return jedis.hget(AUCTIONS, id);
 		} catch (Exception e) {
 			throw new JedisException("Error when getting key!");
