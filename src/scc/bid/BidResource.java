@@ -20,11 +20,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
 import scc.auction.AuctionDAO;
 import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
 import scc.user.CosmosDBLayer;
 import scc.user.UserDAO;
+import scc.utils.UniqueId;
 import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.core.Cookie;
 
@@ -34,10 +37,10 @@ public class BidResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createBid(@CookieParam("scc:session") Cookie session, Bid bid, @PathParam("id") String auctionId)
+    public Response createBid(@CookieParam("scc:session") Cookie session, Bid bid, @PathParam("id") String auctionId)
             throws JsonProcessingException {
 
-        bid.setId(UUID.randomUUID().toString());
+        String id;
 
         if (!RedisCache.userExists(bid.getBidderId())) {
             if (!CosmosDBLayer.getInstance().getUserById(bid.getBidderId()).iterator().hasNext())
@@ -45,14 +48,18 @@ public class BidResource {
         }
 
         try {
-            RedisCache.checkCookieUser(session, bid.getBidderId());
+            NewCookie cookie = RedisCache.checkCookieUser(session, bid.getBidderId());
 
             double minBidAmount;
             CosmosDBBidLayer bidDB = CosmosDBBidLayer.getInstance();
             Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
-            if (highestBid.hasNext())
-                minBidAmount = highestBid.next().getAmount();
+            if (highestBid.hasNext()){
+                BidDAO next = highestBid.next();
+                id = UniqueId.bidId(auctionId, Integer.parseInt(next.getId().split("#")[1] + 1));
+                minBidAmount = next.getAmount();
+            }
             else {
+                id = UniqueId.bidId(auctionId, 1);
                 if (RedisCache.auctionExists(auctionId)) {
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.registerModule(new JavaTimeModule());
@@ -69,6 +76,7 @@ public class BidResource {
             if (bid.getAmount() <= minBidAmount)
                 throw new WebApplicationException(403);
 
+            bid.setId(id);
             CosmosItemResponse<BidDAO> res = bidDB.putBid(new BidDAO(bid));
             int statusCode = res.getStatusCode();
             if (statusCode > 300) {
@@ -76,7 +84,7 @@ public class BidResource {
             }
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toBid());
-            return json;
+            return Response.ok(json,MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
             throw e;
         }

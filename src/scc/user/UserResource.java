@@ -30,6 +30,7 @@ import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.Response;
 import scc.cache.RedisCache;
 import scc.utils.Hash;
+import scc.utils.UniqueId;
 
 @Path("/user")
 public class UserResource {
@@ -61,9 +62,8 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String createUser(User user) throws JsonProcessingException {
-
+        user.setId(UniqueId.randomUUID(user.getId()));
         UserDAO tmp = new UserDAO(user);
-        tmp.setId(UUID.randomUUID().toString());
         tmp.setPwd(Hash.of(user.getPwd()));
         CosmosItemResponse<UserDAO> res = CosmosDBLayer.getInstance().putUser(tmp);
         int statusCode = res.getStatusCode();
@@ -71,11 +71,12 @@ public class UserResource {
             throw new WebApplicationException(statusCode);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
-        // TODO kinda trash
+        // TODO Imprimir json om pass hashed
         User aux = res.getItem().toUser();
+        String jsonPrime = ow.writeValueAsString(aux);
         aux.setPwd(user.getPwd());
         String json = ow.writeValueAsString(aux);
-        RedisCache.putUser(user.getId(), json);
+        RedisCache.putUser(user.getId(), jsonPrime);
         return json;
     }
 

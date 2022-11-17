@@ -1,12 +1,12 @@
 package scc.auction;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import scc.utils.Status;
+import scc.utils.UniqueId;
 import scc.utils.ZonedDateTimeDeserializer;
 
 /**
@@ -21,10 +21,10 @@ public class Auction {
 	private Status status;
 	private String winnerBidId;
 
-    public Auction(@JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
+    public Auction(@JsonProperty("id") String id, @JsonProperty("title")String title,@JsonProperty("photoId") String photoId,
      @JsonProperty("description") String description, @JsonProperty("ownerId") String ownerId,
      @JsonProperty("endTime") ZonedDateTime endTime, @JsonProperty("minPrice") double minPrice){
-		this.id = UUID.randomUUID().toString();
+		this.id = UniqueId.randomUUID(id);
 		this.title = title;
 		this.description = description;
 		this.photoId = photoId;

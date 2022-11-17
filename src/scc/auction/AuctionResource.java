@@ -23,6 +23,8 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
 import scc.cache.RedisCache;
 import scc.user.CosmosDBLayer;
 import scc.user.UserDAO;
@@ -33,11 +35,11 @@ public class AuctionResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createAuction(@CookieParam("scc:session") Cookie session, Auction auction)
+    public Response createAuction(@CookieParam("scc:session") Cookie session, Auction auction)
             throws JsonProcessingException {
 
         try {
-            RedisCache.checkCookieUser(session, auction.getOwnerId());
+            NewCookie cookie = RedisCache.checkCookieUser(session, auction.getOwnerId());
             ObjectMapper om = new ObjectMapper()
                     .registerModule(new JavaTimeModule());
             ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
@@ -54,7 +56,7 @@ public class AuctionResource {
 
             String json = ow.writeValueAsString(res.getItem().toAuction());
             RedisCache.putAuction(auction.getId(), json);
-            return json;
+            return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
             throw e;
         }
@@ -63,17 +65,17 @@ public class AuctionResource {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String deleteAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id,
+    public Response deleteAuction(@CookieParam("scc:session") Cookie session, @PathParam("id") String id,
             String ownerId) {
         try {
-            RedisCache.checkCookieUser(session, ownerId);
+            NewCookie cookie = RedisCache.checkCookieUser(session, ownerId);
             CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
             CosmosItemResponse<Object> res = db.delAuctionById(id);
             int resStatus = res.getStatusCode();
             if (resStatus > 300)
                 throw new WebApplicationException(resStatus);
             RedisCache.deleteAuction(id);
-            return String.valueOf(res.getStatusCode());
+            return Response.ok(String.valueOf(res.getStatusCode()),MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -85,11 +87,11 @@ public class AuctionResource {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String updateAuction(@CookieParam("scc:session") Cookie session, Auction auction)
+    public Response updateAuction(@CookieParam("scc:session") Cookie session, Auction auction)
             throws JsonProcessingException {
 
         try {
-            RedisCache.checkCookieUser(session, auction.getOwnerId());
+            NewCookie cookie = RedisCache.checkCookieUser(session, auction.getOwnerId());
             CosmosDBAuctionLayer db = CosmosDBAuctionLayer.getInstance();
             if (!auctionExists(auction.getId(), db))
                 throw new WebApplicationException("Auction not found", 404);
@@ -100,7 +102,7 @@ public class AuctionResource {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toAuction());
             RedisCache.putAuction(auction.getId(), json);
-            return json;
+            return Response.ok(json,MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -116,7 +118,7 @@ public class AuctionResource {
         StringBuilder res = new StringBuilder();
         Iterator<AuctionDAO> ite = db.getAuctions().iterator();
         while (ite.hasNext()) {
-            res.append(ite.next().toString() + "\n\n");
+            res.append(ite.next().toAuction().toString() + "\n\n");
         }
         return res.toString();
     }

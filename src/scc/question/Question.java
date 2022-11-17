@@ -4,13 +4,15 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import scc.utils.UniqueId;
+
 public class Question {
 
     private String id, ownerId, auctionId, message, reply;
 
     public Question(@JsonProperty("ownerId") String ownerId,
             @JsonProperty("auctionId") String auctionId, @JsonProperty("message") String message) {
-        this.id = UUID.randomUUID().toString();
+        this.id = UniqueId.questionId();
         this.auctionId = auctionId;
         this.message = message;
         this.ownerId = ownerId;
