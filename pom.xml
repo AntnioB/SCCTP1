@@ -8,23 +8,23 @@
   <packaging>war</packaging>  
   <properties> 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
-    <authors>57869-57854-58152</authors> 
-    <functionAppName>sccfunbackend-57869-57854-58152</functionAppName>
-    <functionAppRegion>westeurope</functionAppRegion>
-    <functionPricingTier>B1</functionPricingTier>
-    <functionResourceGroup>scc2223-rg-westeurope-58152</functionResourceGroup>
+    <authors>57869-57854-58152</authors>  
+    <functionAppName>sccfunbackend-57869-57854-58152</functionAppName>  
+    <functionAppRegion>westeurope</functionAppRegion>  
+    <functionPricingTier>B1</functionPricingTier>  
+    <functionResourceGroup>scc2223-rg-westeurope-58152</functionResourceGroup> 
   </properties>  
   <dependencies> 
     <dependency> 
       <groupId>com.azure</groupId>  
       <artifactId>azure-storage-blob</artifactId>  
       <version>12.19.1</version> 
-    </dependency> 
-    <dependency>
-      <groupId>com.microsoft.azure.functions</groupId>
-      <artifactId>azure-functions-java-library</artifactId>
-      <version>2.1.0</version>
-  </dependency> 
+    </dependency>  
+    <dependency> 
+      <groupId>com.microsoft.azure.functions</groupId>  
+      <artifactId>azure-functions-java-library</artifactId>  
+      <version>2.1.0</version> 
+    </dependency>  
     <dependency> 
       <groupId>javax.ws.rs</groupId>  
       <artifactId>javax.ws.rs-api</artifactId>  
@@ -109,41 +109,46 @@
       <groupId>redis.clients</groupId>  
       <artifactId>jedis</artifactId>  
       <version>4.2.3</version> 
+    </dependency>  
+    <dependency> 
+      <groupId>com.fasterxml.jackson.datatype</groupId>  
+      <artifactId>jackson-datatype-jsr310</artifactId>  
+      <version>2.13.4</version> 
+    </dependency>  
+    <dependency> 
+      <groupId>com.microsoft.azure</groupId>  
+      <artifactId>azure</artifactId>  
+      <version>1.41.4</version> 
+    </dependency>  
+    <dependency> 
+      <groupId>com.azure</groupId>  
+      <artifactId>azure-cosmos</artifactId>  
+      <version>4.37.0</version> 
+    </dependency>  
+    <dependency> 
+      <groupId>org.glassfish.jersey.core</groupId>  
+      <artifactId>jersey-client</artifactId>  
+      <version>3.0.8</version> 
+    </dependency>  
+    <dependency> 
+      <groupId>org.glassfish.jersey.inject</groupId>  
+      <artifactId>jersey-hk2</artifactId>  
+      <version>2.28</version> 
+    </dependency>  
+    <dependency> 
+      <groupId>com.fasterxml.jackson.core</groupId>  
+      <artifactId>jackson-core</artifactId>  
+      <version>2.13.4</version> 
+    </dependency>  
+    <dependency> 
+      <groupId>com.fasterxml.jackson.datatype</groupId>  
+      <artifactId>jackson-datatype-jsr310</artifactId>  
+      <version>2.13.4</version> 
     </dependency> 
     <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.13.4</version>
-    </dependency>
-  		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>azure</artifactId>
-			<version>1.41.4</version>
-		</dependency>
-		<dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-cosmos</artifactId>
-			<version>4.37.0</version>
-		</dependency>
-    <dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>3.0.8</version>
-		</dependency>
-    <dependency>
-    <groupId>org.glassfish.jersey.inject</groupId>
-    <artifactId>jersey-hk2</artifactId>
-    <version>2.28</version>
-</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.13.4</version>
-		</dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.13.4</version>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-search-documents</artifactId>
+      <version>11.5.1</version>
     </dependency>
   </dependencies>  
   <build> 

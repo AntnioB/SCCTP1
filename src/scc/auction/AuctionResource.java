@@ -1,43 +1,44 @@
 package scc.auction;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
+import java.util.Map;
 
-import org.glassfish.jersey.client.ClientConfig;
 
+import com.azure.core.credential.AzureKeyCredential;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import com.azure.search.documents.SearchClient;
+import com.azure.search.documents.SearchClientBuilder;
+import com.azure.search.documents.SearchDocument;
+import com.azure.search.documents.models.SearchOptions;
+import com.azure.search.documents.util.SearchPagedIterable;
+import com.azure.search.documents.util.SearchPagedResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
 import scc.cache.RedisCache;
 import scc.srv.MainApplication;
 import scc.user.CosmosDBLayer;
-import scc.user.UserDAO;
 
 @Path("/auction")
 public class AuctionResource {
@@ -155,29 +156,46 @@ public class AuctionResource {
 
     @GET
     @Path("/search")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String search() {
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response searchRest(@DefaultValue("*") @QueryParam("query") String query) {
 
-        String hostname = "https://" + MainApplication.PROP_SERVICE_NAME + ".search.windows.net/";
-        ClientConfig config = new ClientConfig();
-        Client client = ClientBuilder.newClient(config);
+        SearchClient searchClient = new SearchClientBuilder()
+                .credential(new AzureKeyCredential(MainApplication.PROP_QUERY_KEY))
+                .endpoint("https://scc23cs58152.search.windows.net")
+                .indexName("cosmosdb-index")
+                .buildClient();
 
-        URI baseURI = UriBuilder.fromUri(hostname).build();
+        SearchOptions options = new SearchOptions()
+                .setIncludeTotalCount(true)
+                .setSelect("id", "title", "description", "ownerId", "status", "photoId", "minPrice")
+                .setSearchFields("title", "description")
+                .setTop(5);
 
-        WebTarget target = client.target(baseURI);
+        SearchPagedIterable searchPagedIterable = searchClient.search(query, options, null);
 
-        String index = "cosmosdb-index";
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode obj = mapper.createObjectNode();
-        obj.put("count", "true");
-        obj.put("search", "test");
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
-        String resultStr = target.path("indexes/" + index + "/docs").queryParam("api-version", "2020-06-30")
-                .queryParam("search", "test")
-                .request().header("api-key", MainApplication.PROP_QUERY_KEY)
-                .accept(MediaType.APPLICATION_JSON).post(Entity.entity(obj.toString(), MediaType.APPLICATION_JSON))
-                .readEntity(String.class);
+        StringBuilder json = new StringBuilder();
+        for (SearchPagedResponse resultResponse : searchPagedIterable.iterableByPage()) {
+            resultResponse.getValue().forEach((searchResult) -> {
+                
+                for (Map.Entry<String, Object> res : searchResult
+                        .getDocument(SearchDocument.class)
+                        .entrySet()) {
+                    try {
+                        json.append(ow.writeValueAsString(res.getKey() +" -> "+res.getValue()));
+                        json.append("\n");
+                        
+                    } catch (JsonProcessingException e) {
+                        throw new WebApplicationException(418);
+                    }
 
-        return resultStr;
+                }
+                json.append("\n");
+            });
+        }
+
+        return Response.ok(json.toString()).build();
     }
+
 }
