@@ -56,7 +56,7 @@ public class BidResource {
             Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
             if (highestBid.hasNext()) {
                 BidDAO next = highestBid.next();
-                id = UniqueId.bidId(auctionId, Integer.parseInt(next.getId().split("-")[1] + 1));
+                id = UniqueId.bidId(auctionId, Integer.parseInt(next.getId().split("-")[1]) + 1);
                 minBidAmount = next.getAmount();
             } else {
                 id = UniqueId.bidId(auctionId, 1);
