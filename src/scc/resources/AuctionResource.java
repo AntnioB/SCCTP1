@@ -67,7 +67,7 @@ public class AuctionResource {
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
 
-            String json = ow.writeValueAsString(res.getItem().toAuction());
+            String json = ow.writeValueAsString(res.getItem());
             RedisCache.putAuction(auction.getId(), json);
             return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
@@ -113,7 +113,7 @@ public class AuctionResource {
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(res.getItem().toAuction());
+            String json = ow.writeValueAsString(res.getItem());
             RedisCache.putAuction(auction.getId(), json);
             return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
