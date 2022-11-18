@@ -54,12 +54,11 @@ public class BidResource {
             double minBidAmount;
             BidLayer bidDB = BidLayer.getInstance();
             Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
-            if (highestBid.hasNext()){
+            if (highestBid.hasNext()) {
                 BidDAO next = highestBid.next();
                 id = UniqueId.bidId(auctionId, Integer.parseInt(next.getId().split("-")[1] + 1));
                 minBidAmount = next.getAmount();
-            }
-            else {
+            } else {
                 id = UniqueId.bidId(auctionId, 1);
                 if (RedisCache.auctionExists(auctionId)) {
                     ObjectMapper mapper = new ObjectMapper();
@@ -70,6 +69,7 @@ public class BidResource {
                     AuctionLayer auctionDB = AuctionLayer.getInstance();
                     if (auctionDB.getAuctionById(auctionId).iterator().hasNext())
                         minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
+
                     else
                         throw new NotFoundException("Auction does not exist");
                 }
@@ -85,7 +85,7 @@ public class BidResource {
             }
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toBid());
-            return Response.ok(json,MediaType.APPLICATION_JSON).cookie(cookie).build();
+            return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
             throw e;
         }

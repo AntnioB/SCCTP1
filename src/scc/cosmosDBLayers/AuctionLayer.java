@@ -10,7 +10,11 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
+import scc.cache.RedisCache;
 import scc.data.database.AuctionDAO;
 import scc.srv.MainApplication;
 import scc.utils.Status;
@@ -73,10 +77,17 @@ public class AuctionLayer {
 		return auctions.createItem(auction);
 	}
 
-	public CosmosPagedIterable<AuctionDAO> getAuctionById(String id) {
+	public CosmosPagedIterable<AuctionDAO> getAuctionById(String id) throws JsonProcessingException {
 		init();
-		return auctions.queryItems("SELECT * FROM auctions WHERE auctions.id=\"" + id + "\"",
+		CosmosPagedIterable<AuctionDAO> cosmosPagedIterable = auctions.queryItems(
+				"SELECT * FROM auctions WHERE auctions.id=\"" + id + "\"",
 				new CosmosQueryRequestOptions(), AuctionDAO.class);
+		if (cosmosPagedIterable.iterator().hasNext()) {
+			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			String json = ow.writeValueAsString(cosmosPagedIterable.iterator().next().toAuction());
+			RedisCache.putAuction(id, json);
+		}
+		return cosmosPagedIterable;
 	}
 
 	public CosmosPagedIterable<AuctionDAO> getAuctionByOwnerId(String ownerId) {
@@ -95,9 +106,10 @@ public class AuctionLayer {
 		return auctions.upsertItem(auction);
 	}
 
-	public CosmosPagedIterable<AuctionDAO> getOpenAuctions(){
+	public CosmosPagedIterable<AuctionDAO> getOpenAuctions() {
 		init();
-		return auctions.queryItems("SELECT * FROM auctions WHERE auctions.status= \""+ Status.OPEN + "\"", new CosmosQueryRequestOptions(),AuctionDAO.class);
+		return auctions.queryItems("SELECT * FROM auctions WHERE auctions.status= \"" + Status.OPEN + "\"",
+				new CosmosQueryRequestOptions(), AuctionDAO.class);
 	}
 
 	public void close() {

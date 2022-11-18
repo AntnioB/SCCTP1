@@ -10,7 +10,11 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
+import scc.cache.RedisCache;
 import scc.data.database.UserDAO;
 import scc.srv.MainApplication;
 
@@ -18,7 +22,6 @@ public class UserLayer {
 	private static final String CONNECTION_URL = MainApplication.CONNECTION_URL;
 	private static final String DB_KEY = MainApplication.DB_KEY;
 	private static final String DB_NAME = MainApplication.DB_NAME;
-
 
 	private static UserLayer instance;
 
@@ -72,10 +75,17 @@ public class UserLayer {
 		return users.createItem(user);
 	}
 
-	public CosmosPagedIterable<UserDAO> getUserById(String id) {
+	public CosmosPagedIterable<UserDAO> getUserById(String id) throws JsonProcessingException {
 		init();
-		return users.queryItems("SELECT * FROM users WHERE users.id=\"" + id + "\"", new CosmosQueryRequestOptions(),
+		CosmosPagedIterable<UserDAO> cosmosPagedIterable = users.queryItems(
+				"SELECT * FROM users WHERE users.id=\"" + id + "\"", new CosmosQueryRequestOptions(),
 				UserDAO.class);
+		if (cosmosPagedIterable.iterator().hasNext()) {
+			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			String json = ow.writeValueAsString(cosmosPagedIterable.iterator().next().toUser());
+			RedisCache.putUser(id, json);
+		}
+		return cosmosPagedIterable;
 	}
 
 	public CosmosPagedIterable<UserDAO> getUsers() {
