@@ -67,7 +67,7 @@ public class AuctionResource {
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
 
-            String json = ow.writeValueAsString(res.getItem());
+            String json = ow.writeValueAsString(res.getItem().toAuction());
             RedisCache.putAuction(auction.getId(), json);
             return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {

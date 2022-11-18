@@ -41,6 +41,7 @@ public class BidResource {
     public Response createBid(@CookieParam("scc:session") Cookie session, Bid bid, @PathParam("id") String auctionId)
             throws JsonProcessingException {
 
+        String id;
 
         if (!RedisCache.userExists(bid.getBidderId())) {
             if (!UserLayer.getInstance().getUserById(bid.getBidderId()).iterator().hasNext())
@@ -51,48 +52,39 @@ public class BidResource {
             NewCookie cookie = RedisCache.checkCookieUser(session, bid.getBidderId());
 
             double minBidAmount;
-
-            AuctionLayer auctionDB = AuctionLayer.getInstance();
-            AuctionDAO auction;
-            if (RedisCache.auctionExists(auctionId)) {
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.registerModule(new JavaTimeModule());
-                auction = mapper.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
-                minBidAmount = auction.getMinPrice();
+            BidLayer bidDB = BidLayer.getInstance();
+            Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
+            if (highestBid.hasNext()) {
+                BidDAO next = highestBid.next();
+                minBidAmount = next.getAmount();
             } else {
-                if (auctionDB.getAuctionById(auctionId).iterator().hasNext()){
-                    auction = auctionDB.getAuctionById(auctionId).iterator().next();
+                if (RedisCache.auctionExists(auctionId)) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.registerModule(new JavaTimeModule());
+                    AuctionDAO auction = mapper.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
                     minBidAmount = auction.getMinPrice();
-                } else
-                    throw new NotFoundException("Auction does not exist");
-            }
+                } else {
+                    AuctionLayer auctionDB = AuctionLayer.getInstance();
+                    if (auctionDB.getAuctionById(auctionId).iterator().hasNext())
+                        minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
 
+                    else
+                        throw new NotFoundException("Auction does not exist");
+                }
+            }
             if (bid.getAmount() <= minBidAmount)
                 throw new WebApplicationException(403);
 
             bid.setId(UniqueId.bidId());
-            BidLayer bidDB = BidLayer.getInstance();
             CosmosItemResponse<BidDAO> res = bidDB.putBid(new BidDAO(bid));
             int statusCode = res.getStatusCode();
             if (statusCode > 300) {
                 throw new WebApplicationException(statusCode);
             }
-            
-            auction.setMinPrice(bid.getAmount());
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(auction);
-            RedisCache.putAuction(auction.getId(), json);
-            CosmosItemResponse<AuctionDAO> upsertAuction = auctionDB.updateAuction(auction);
-            statusCode = upsertAuction.getStatusCode();
-            if (statusCode > 300) {
-                throw new WebApplicationException(statusCode);
-            }
-            
-            String response = ow.writeValueAsString(res.getItem().toBid());
-            return Response.ok(response, MediaType.APPLICATION_JSON).cookie(cookie).build();
-        } catch (
-
-        WebApplicationException e) {
+            String json = ow.writeValueAsString(res.getItem().toBid());
+            return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
+        } catch (WebApplicationException e) {
             throw e;
         }
     }
