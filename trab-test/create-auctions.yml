@@ -27,7 +27,7 @@ scenarios:
             headers:
               Content-Type: application/json
             json:
-              user: "{{ id }}"
+              id: "{{ user }}"
               pwd: "{{ pwd }}"
         - function: "genNewAuction"
         - post:                          # First: post image for the auction
@@ -49,14 +49,14 @@ scenarios:
             json:
               description: "{{ description }}"
               title: "{{ title }}"
-              owner: "{{ ownerId }}"
-              imageId: "{{ photoId }}"
+              ownerId: "{{ user }}"
+              photoId: "{{ imageId }}"
               endTime: "{{ endTime }}"
-              minimumPrice: "{{ minPrice }}"
+              minPrice: "{{ minimumPrice }}"
             capture:                     # Capturing auction id and store it in variable auctionId
               - json: $.id
                 as: "auctionId"
-              - json: $.owner
+              - json: $.ownerId
                 as: "auctionUser"
         - loop:                          # Let's add numBids bids to the auction
           - function: "selectUserSkewed"
@@ -67,7 +67,7 @@ scenarios:
               headers:
                 Content-Type: application/json
               json:
-                user: "{{ user }}"
+                id: "{{ user }}"
                 pwd: "{{ pwd }}"
           - post:                          # New bid     
               url: "/auction/{{ auctionId }}/bid"
@@ -77,8 +77,8 @@ scenarios:
                 Accept: application/json
               json:
                 auctionId: "{{ auctionId }}"
-                user: "{{ user }}"
-                value: "{{ value }}"
+                bidderId: "{{ user }}"
+                amount: "{{ value }}"
           count: "{{ numBids }}"   
         - loop:                          # Let's add numQuestions questions to the auction
           - function: "selectUserSkewed"
@@ -89,7 +89,7 @@ scenarios:
               headers:
                 Content-Type: application/json
               json:
-                user: "{{ user }}"
+                id: "{{ user }}"
                 pwd: "{{ pwd }}"
           - post:                          # New question     
               url: "/auction/{{ auctionId }}/question"
@@ -99,8 +99,8 @@ scenarios:
                 Accept: application/json
               json:
                 auctionId: "{{ auctionId }}"
-                user: "{{ user }}"
-                text: "{{ text }}"
+                ownerId: "{{ user }}"
+                message: "{{ text }}"
               capture:                     # Capturing question id and store it in variable questionId
                 - json: $.id
                   as: "questionId"
@@ -111,7 +111,7 @@ scenarios:
               headers:
                 Content-Type: application/json
               json:
-                user: "{{ auctionUser }}"
+                id: "{{ auctionUser }}"
                 pwd: "{{ auctionUserPwd }}"
               ifTrue: "reply"
           - post:                          # New reply     
@@ -121,6 +121,7 @@ scenarios:
                 Content-Type: application/json
                 Accept: application/json
               json:
+                ownerId: "{{auctionUser}}"
                 reply: "{{ reply }}"
               ifTrue: "reply"
           count: "{{ numQuestions }}"   

@@ -1,10 +1,5 @@
 'use strict';
 
-
-module.im
-
-import {ZonedDateTime} from '@js-joda/root/packages/core/src/ZonedDateTime.js'
-
 /***
  * Exported functions to be used in the testing scripts.
  */
@@ -194,9 +189,9 @@ function genNewAuction(context, events, done) {
 	var maxQuestions = 2
 	if( typeof context.vars.maxQuestions !== 'undefined')
 		maxQuestions = context.vars.maxQuestions;
-	var d = new ZonedDateTime();
-	d.plusSeconds(random( 300000));
-	context.vars.endTime = d.toString();
+	var d = new Date();
+	d.setTime(Date.now() + random( 300000));
+	context.vars.endTime = d.toISOString();
 	if( Math.random() > 0.2) { 
 		context.vars.status = "OPEN";
 		context.vars.numBids = random( maxBids);
