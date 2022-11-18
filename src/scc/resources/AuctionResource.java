@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.Map;
 
-
 import com.azure.core.credential.AzureKeyCredential;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
@@ -68,7 +67,7 @@ public class AuctionResource {
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
 
-            String json = ow.writeValueAsString(res.getItem().toAuction());
+            String json = ow.writeValueAsString(res.getItem());
             RedisCache.putAuction(auction.getId(), json);
             return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
@@ -114,7 +113,7 @@ public class AuctionResource {
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(res.getItem().toAuction());
+            String json = ow.writeValueAsString(res.getItem());
             RedisCache.putAuction(auction.getId(), json);
             return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
@@ -150,11 +149,17 @@ public class AuctionResource {
         return "200";
     }
 
-    private boolean auctionExists(String id, AuctionLayer db) {
+    private boolean auctionExists(String id, AuctionLayer db) throws JsonProcessingException {
         if (RedisCache.auctionExists(id))
             return true;
         CosmosPagedIterable<AuctionDAO> res = db.getAuctionById(id);
-        return res.iterator().hasNext();
+        AuctionDAO auction = res.iterator().next();
+        if (auction != null) {
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String json = ow.writeValueAsString(auction.toAuction());
+            RedisCache.putAuction(id, json);
+        }
+        return auction != null;
     }
 
     @GET
@@ -181,14 +186,14 @@ public class AuctionResource {
         StringBuilder json = new StringBuilder();
         for (SearchPagedResponse resultResponse : searchPagedIterable.iterableByPage()) {
             resultResponse.getValue().forEach((searchResult) -> {
-                
+
                 for (Map.Entry<String, Object> res : searchResult
                         .getDocument(SearchDocument.class)
                         .entrySet()) {
                     try {
-                        json.append(ow.writeValueAsString(res.getKey() +" -> "+res.getValue()));
+                        json.append(ow.writeValueAsString(res.getKey() + " -> " + res.getValue()));
                         json.append("\n");
-                        
+
                     } catch (JsonProcessingException e) {
                         throw new WebApplicationException(418);
                     }

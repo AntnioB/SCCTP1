@@ -184,11 +184,17 @@ public class UserResource {
         return "200";
     }
 
-    private boolean userExists(String id, UserLayer db) {
+    private boolean userExists(String id, UserLayer db) throws JsonProcessingException {
         if (RedisCache.userExists(id))
             return true;
         CosmosPagedIterable<UserDAO> res = db.getUserById(id);
-        return res.iterator().hasNext();
+        UserDAO user = res.iterator().next();
+        if (user != null) {
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String json = ow.writeValueAsString(user.toUser());
+            RedisCache.putAuction(id, json);
+        }
+        return user != null;
     }
 
 }

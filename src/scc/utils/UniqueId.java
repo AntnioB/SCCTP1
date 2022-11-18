@@ -4,18 +4,22 @@ import java.util.UUID;
 public class UniqueId {
     
     public static String randomUUID(String id){
-        return id + "-" + UUID.randomUUID().toString().replace("-","");
+        return id + "-" + uuid();
     }
 
     public static String auctionId(){
-        return "auction-" + UUID.randomUUID().toString().replace("-","");
+        return "auction-" + uuid();
     }
 
-    public static String bidId(String id, int num){
-        return "bid-" + num + "-" + id;
+    public static String bidId(){
+        return "bid-" + uuid();
     }
 
     public static String questionId(){
-        return "question-" + UUID.randomUUID().toString().replace("-","");
+        return "question-" + uuid();
+    }
+
+    private static String uuid(){
+        return UUID.randomUUID().toString().replace("-","");
     }
 }
