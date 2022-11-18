@@ -1,4 +1,4 @@
-package scc.question;
+package scc.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

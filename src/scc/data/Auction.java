@@ -1,4 +1,4 @@
-package scc.auction;
+package scc.data;
 
 import java.time.ZonedDateTime;
 

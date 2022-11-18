@@ -1,8 +1,7 @@
-package scc.user;
+package scc.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import scc.utils.UniqueId;
 
 /**
  * Represents a User, as returned to the clients

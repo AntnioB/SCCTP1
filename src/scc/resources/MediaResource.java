@@ -1,4 +1,4 @@
-package scc.media;
+package scc.resources;
 
 import scc.srv.MainApplication;
 import scc.utils.Hash;

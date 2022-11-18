@@ -1,4 +1,6 @@
-package scc.user;
+package scc.data.database;
+
+import scc.data.User;
 
 /**
  * Represents a User, as stored in the database

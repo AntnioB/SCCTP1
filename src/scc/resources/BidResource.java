@@ -1,7 +1,6 @@
-package scc.bid;
+package scc.resources;
 
 import java.util.Iterator;
-import java.util.UUID;
 
 import jakarta.ws.rs.WebApplicationException;
 
@@ -22,11 +21,13 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
-import scc.auction.AuctionDAO;
-import scc.auction.CosmosDBAuctionLayer;
 import scc.cache.RedisCache;
-import scc.user.CosmosDBLayer;
-import scc.user.UserDAO;
+import scc.cosmosDBLayers.AuctionLayer;
+import scc.cosmosDBLayers.BidLayer;
+import scc.cosmosDBLayers.UserLayer;
+import scc.data.Bid;
+import scc.data.database.AuctionDAO;
+import scc.data.database.BidDAO;
 import scc.utils.UniqueId;
 import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.core.Cookie;
@@ -43,7 +44,7 @@ public class BidResource {
         String id;
 
         if (!RedisCache.userExists(bid.getBidderId())) {
-            if (!CosmosDBLayer.getInstance().getUserById(bid.getBidderId()).iterator().hasNext())
+            if (!UserLayer.getInstance().getUserById(bid.getBidderId()).iterator().hasNext())
                 throw new NotFoundException("User does not exist");
         }
 
@@ -51,11 +52,11 @@ public class BidResource {
             NewCookie cookie = RedisCache.checkCookieUser(session, bid.getBidderId());
 
             double minBidAmount;
-            CosmosDBBidLayer bidDB = CosmosDBBidLayer.getInstance();
+            BidLayer bidDB = BidLayer.getInstance();
             Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
             if (highestBid.hasNext()){
                 BidDAO next = highestBid.next();
-                id = UniqueId.bidId(auctionId, Integer.parseInt(next.getId().split("#")[1] + 1));
+                id = UniqueId.bidId(auctionId, Integer.parseInt(next.getId().split("-")[1] + 1));
                 minBidAmount = next.getAmount();
             }
             else {
@@ -66,7 +67,7 @@ public class BidResource {
                     AuctionDAO auction = mapper.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
                     minBidAmount = auction.getMinPrice();
                 } else {
-                    CosmosDBAuctionLayer auctionDB = CosmosDBAuctionLayer.getInstance();
+                    AuctionLayer auctionDB = AuctionLayer.getInstance();
                     if (auctionDB.getAuctionById(auctionId).iterator().hasNext())
                         minBidAmount = auctionDB.getAuctionById(auctionId).iterator().next().getMinPrice();
                     else
@@ -93,7 +94,7 @@ public class BidResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String listBids(@PathParam("id") String auctionId) {
-        CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
+        BidLayer db = BidLayer.getInstance();
         StringBuilder res = new StringBuilder();
         Iterator<BidDAO> ite = db.getBidByAuctionId(auctionId).iterator();
         BidDAO next;
@@ -109,7 +110,7 @@ public class BidResource {
     @Path("/delete")
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteAll() {
-        CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
+        BidLayer db = BidLayer.getInstance();
         Iterator<BidDAO> ite = db.getBids().iterator();
         while (ite.hasNext()) {
             db.delBid(ite.next());
@@ -121,7 +122,7 @@ public class BidResource {
     @Path("/highest")
     @Produces(MediaType.TEXT_PLAIN)
     public String getHighestBid(@PathParam("id") String auctionId) {
-        CosmosDBBidLayer db = CosmosDBBidLayer.getInstance();
+        BidLayer db = BidLayer.getInstance();
         Iterator<BidDAO> ite = db.getHighestBid(auctionId).iterator();
         while (ite.hasNext()) {
             return ite.next().toString();

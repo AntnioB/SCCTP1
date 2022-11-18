@@ -1,4 +1,6 @@
-package scc.question;
+package scc.data.database;
+
+import scc.data.Question;
 
 public class QuestionDAO {
 

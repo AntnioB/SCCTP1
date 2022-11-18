@@ -1,7 +1,8 @@
-package scc.auction;
+package scc.data.database;
 
 import java.time.ZonedDateTime;
 
+import scc.data.Auction;
 import scc.utils.Status;
 
 /**

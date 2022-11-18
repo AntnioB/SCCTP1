@@ -1,4 +1,6 @@
-package scc.bid;
+package scc.data.database;
+
+import scc.data.Bid;
 
 public class BidDAO {
     private String _rid;

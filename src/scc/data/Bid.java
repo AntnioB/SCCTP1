@@ -1,4 +1,4 @@
-package scc.bid;
+package scc.data;
 
 import java.util.UUID;
 
