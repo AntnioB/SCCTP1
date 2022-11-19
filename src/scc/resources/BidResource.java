@@ -1,5 +1,6 @@
 package scc.resources;
 
+import java.time.ZonedDateTime;
 import java.util.Iterator;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -28,6 +29,7 @@ import scc.cosmosDBLayers.UserLayer;
 import scc.data.Bid;
 import scc.data.database.AuctionDAO;
 import scc.data.database.BidDAO;
+import scc.utils.Status;
 import scc.utils.UniqueId;
 import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.core.Cookie;
@@ -66,7 +68,10 @@ public class BidResource {
                 } else
                     throw new WebApplicationException("Auction does not exist", 404);
             }
-            
+
+            if(auction.getStatus().equals(Status.CLOSED)  || auction.getEndTime().isBefore(ZonedDateTime.now())){
+                throw new WebApplicationException("Auction is closed no more bids will be accepted", 403);
+            }
             if (bid.getAmount() <= minBidAmount)
                 throw new WebApplicationException("Bid amount must be higher than the previous bid",403);
 
