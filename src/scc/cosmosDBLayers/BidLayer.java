@@ -80,7 +80,7 @@ public class BidLayer {
 
 	public CosmosPagedIterable<BidDAO> getBidByAuctionId(String id){
 		init();
-		return bids.queryItems("SELECT * FROM bids WHERE bids.auctionId=\"" + id + "\"",
+		return bids.queryItems("SELECT * FROM bids WHERE bids.auctionId=\"" + id + "\" ORDER BY bids.amount DESC",
 				new CosmosQueryRequestOptions(), BidDAO.class);
 	}
 
