@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
@@ -107,19 +106,6 @@ public class BidResource {
             res.append(next.toString() + "\n\n");
         }
         return res.toString();
-    }
-
-    // TODO just for testing purposes need to delete
-    @DELETE
-    @Path("/delete")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String deleteAll() {
-        BidLayer db = BidLayer.getInstance();
-        Iterator<BidDAO> ite = db.getBids().iterator();
-        while (ite.hasNext()) {
-            db.delBid(ite.next());
-        }
-        return "200";
     }
 
     @GET

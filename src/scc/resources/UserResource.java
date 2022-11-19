@@ -34,7 +34,6 @@ import scc.cosmosDBLayers.AuctionLayer;
 import scc.cosmosDBLayers.BidLayer;
 import scc.cosmosDBLayers.QuestionLayer;
 import scc.cosmosDBLayers.UserLayer;
-import scc.data.Auction;
 import scc.data.User;
 import scc.data.database.AuctionDAO;
 import scc.data.database.BidDAO;
@@ -84,7 +83,6 @@ public class UserResource {
             throw new WebApplicationException(statusCode);
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
-        // TODO Imprimir json om pass hashed
         User aux = res.getItem().toUser();
         String jsonPrime = ow.writeValueAsString(aux);
         aux.setPwd(user.getPwd());
@@ -146,7 +144,9 @@ public class UserResource {
             UserLayer db = UserLayer.getInstance();
             if (!userExists(user.getId(), db))
                 throw new WebApplicationException(409);
-            CosmosItemResponse<UserDAO> res = db.updateUser(new UserDAO(user));
+            UserDAO temp = new UserDAO(user);
+            temp.setPwd(Hash.of(temp.getPwd()));
+            CosmosItemResponse<UserDAO> res = db.updateUser(temp);
             int statusCode = res.getStatusCode();
             if (statusCode > 300)
                 throw new WebApplicationException(statusCode);
@@ -201,19 +201,6 @@ public class UserResource {
             res.append(ite.next().toAuction().toString() + "\n\n");
         }
         return res.toString();
-    }
-
-    // TODO just for testing purposes need to delete
-    @DELETE
-    @Path("/delete")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String deleteAll() {
-        UserLayer db = UserLayer.getInstance();
-        Iterator<UserDAO> ite = db.getUsers().iterator();
-        while (ite.hasNext()) {
-            db.delUser(ite.next());
-        }
-        return "200";
     }
 
     private boolean userExists(String id, UserLayer db) throws JsonProcessingException {
