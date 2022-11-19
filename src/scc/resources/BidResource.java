@@ -104,9 +104,9 @@ public class BidResource {
         BidLayer db = BidLayer.getInstance();
         StringBuilder res = new StringBuilder();
         Iterator<BidDAO> ite = db.getBidByAuctionId(auctionId).iterator();
-        BidDAO next;
+        Bid next;
         while (ite.hasNext()) {
-            next = ite.next();
+            next = ite.next().toBid();
             res.append(next.toString() + "\n\n");
         }
         return res.toString();

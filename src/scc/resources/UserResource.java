@@ -181,7 +181,7 @@ public class UserResource {
         Iterator<AuctionDAO> ite = db.getAuctionByOwnerId(id).iterator();
         StringBuilder res = new StringBuilder();
         while(ite.hasNext()){
-            res.append(ite.next().toAuction() + "\n\n");
+            res.append(ite.next().toAuction().toString() + "\n\n");
         }
         return res.toString();
     }
