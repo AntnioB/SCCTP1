@@ -41,6 +41,7 @@ import scc.cosmosDBLayers.UserLayer;
 import scc.data.Auction;
 import scc.data.database.AuctionDAO;
 import scc.srv.MainApplication;
+import scc.utils.UniqueId;
 
 @Path("/auction")
 public class AuctionResource {
@@ -52,6 +53,7 @@ public class AuctionResource {
             throws JsonProcessingException {
 
         try {
+            auction.setId(UniqueId.auctionId());
             NewCookie cookie = RedisCache.checkCookieUser(session, auction.getOwnerId());
             ObjectMapper om = new ObjectMapper()
                     .registerModule(new JavaTimeModule());
@@ -100,10 +102,11 @@ public class AuctionResource {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateAuction(@CookieParam("scc:session") Cookie session, Auction auction)
+    public Response updateAuction(@CookieParam("scc:session") Cookie session, Auction auction, @PathParam("id") String id)
             throws JsonProcessingException {
 
         try {
+            auction.setId(id);
             NewCookie cookie = RedisCache.checkCookieUser(session, auction.getOwnerId());
             AuctionLayer db = AuctionLayer.getInstance();
             if (!auctionExists(auction.getId(), db))
