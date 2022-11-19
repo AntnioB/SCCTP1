@@ -170,6 +170,21 @@ public class UserResource {
         }
         return res.toString();
     }
+    
+    @GET
+    @Path("/{id}/auctions")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getUserAuctions(@PathParam("id") String id){
+        //did not see the need to for a user to be authenticated to make this request
+
+        AuctionLayer db = AuctionLayer.getInstance();
+        Iterator<AuctionDAO> ite = db.getAuctionByOwnerId(id).iterator();
+        StringBuilder res = new StringBuilder();
+        while(ite.hasNext()){
+            res.append(ite.next().toAuction() + "\n\n");
+        }
+        return res.toString();
+    }
 
     // TODO just for testing purposes need to delete
     @DELETE
@@ -184,6 +199,7 @@ public class UserResource {
         return "200";
     }
 
+
     private boolean userExists(String id, UserLayer db) throws JsonProcessingException {
         if (RedisCache.userExists(id))
             return true;
@@ -196,5 +212,7 @@ public class UserResource {
         }
         return user != null;
     }
+
+    
 
 }
