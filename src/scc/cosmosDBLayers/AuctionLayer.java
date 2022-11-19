@@ -106,16 +106,20 @@ public class AuctionLayer {
 		return auctions.upsertItem(auction);
 	}
 
-	public CosmosPagedIterable<AuctionDAO> getOpenAuctions() {
+	public CosmosPagedIterable<AuctionDAO> getAuctionsWithStatusByOwnerId(Status status, String ownerId) {
 		init();
-		return auctions.queryItems("SELECT * FROM auctions WHERE auctions.status= \"" + Status.OPEN + "\"",
+		return auctions.queryItems(
+				"SELECT * FROM auctions WHERE auctions.status= \"" + status + "\" AND auctions.ownerId=\"" + ownerId
+						+ "\"",
 				new CosmosQueryRequestOptions(), AuctionDAO.class);
 	}
 
-	public CosmosPagedIterable<AuctionDAO> getAuctionsAboutToClose(){
+	public CosmosPagedIterable<AuctionDAO> getAuctionsAboutToClose() {
 		init();
-		return auctions.queryItems("SELECT TOP 10 * FROM auctions WHERE auctions.status=\"" + Status.OPEN + "\" ORDER BY auctions.endTime ASC",
-				 new CosmosQueryRequestOptions(), AuctionDAO.class);
+		return auctions.queryItems(
+				"SELECT TOP 10 * FROM auctions WHERE auctions.status=\"" + Status.OPEN
+						+ "\" ORDER BY auctions.endTime ASC",
+				new CosmosQueryRequestOptions(), AuctionDAO.class);
 	}
 
 	public void close() {

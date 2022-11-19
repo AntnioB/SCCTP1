@@ -22,9 +22,8 @@ public class MainApplication extends Application {
 	public static final String DB_NAME = "scc23db58152";
 	public static final String REDIS_HOSTNAME = "rediswesteurope58152.redis.cache.windows.net";
 	public static final String REDIS_KEY = "2WP061eo5XbykzjX9Vf7Zal5SdFDK95DYAzCaFqVyPI=";
-	public static final String SEARCH_PROP_FILE = "search-azurekeys-westeurope.props";
-	public static final String PROP_SERVICE_NAME = "scc23cs58152";
-	public static final String PROP_QUERY_KEY = "1HgHne4L03bVgPAxOURoyeGI31gxpbi6K6ap930T6ZAzSeDsed5Q";
+	public static final String PROP_SERVICE_NAME = "scccs2358152";
+	public static final String PROP_QUERY_KEY = "h83LhYZqKCwRKy5neyEoPN6mfplvmJ6Fe2B6WuI7PiAzSeAVbvAH";
 
 	public MainApplication() {
 		resources.add(ControlResource.class);

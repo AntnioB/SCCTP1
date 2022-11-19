@@ -184,7 +184,7 @@ public class AuctionResource {
 
         SearchClient searchClient = new SearchClientBuilder()
                 .credential(new AzureKeyCredential(MainApplication.PROP_QUERY_KEY))
-                .endpoint("https://scc23cs58152.search.windows.net")
+                .endpoint("https://scccs2358152.search.windows.net")
                 .indexName("cosmosdb-index")
                 .buildClient();
 
