@@ -51,51 +51,43 @@ public class BidResource {
         try {
             NewCookie cookie = RedisCache.checkCookieUser(session, bid.getBidderId());
 
+            AuctionDAO auction;
             double minBidAmount;
             BidLayer bidDB = BidLayer.getInstance();
-            AuctionLayer auctionDB = AuctionLayer.getInstance();
-            AuctionDAO auction;
+            Iterator<BidDAO> highestBid = bidDB.getHighestBid(auctionId).iterator();
             if (RedisCache.auctionExists(auctionId)) {
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.registerModule(new JavaTimeModule());
                 auction = mapper.readValue(RedisCache.getAuction(auctionId), AuctionDAO.class);
-                minBidAmount = auction.getMinPrice();
             } else {
+                AuctionLayer auctionDB = AuctionLayer.getInstance();
                 Iterator<AuctionDAO> it = auctionDB.getAuctionById(auctionId).iterator();
-                if (it.hasNext()){
+                if (it.hasNext())
                     auction = it.next();
-                    minBidAmount = auction.getMinPrice();
-                } else
-                    throw new WebApplicationException("Auction does not exist", 404);
+                else
+                    throw new NotFoundException("Auction does not exist");
             }
-
-            if(auction.getStatus().equals(Status.CLOSED)  || auction.getEndTime().isBefore(ZonedDateTime.now())){
+            if (auction.getStatus().equals(Status.CLOSED) || auction.getEndTime().isBefore(ZonedDateTime.now())) {
                 throw new WebApplicationException("Auction is closed no more bids will be accepted", 403);
             }
+
+            if (highestBid.hasNext()) {
+                BidDAO next = highestBid.next();
+                minBidAmount = next.getAmount();
+            } else {
+                minBidAmount = auction.getMinPrice();
+            }
+
             if (bid.getAmount() <= minBidAmount)
-                throw new WebApplicationException("Bid amount must be higher than the previous bid",403);
+                throw new WebApplicationException(403);
 
             bid.setId(UniqueId.bidId());
             CosmosItemResponse<BidDAO> res = bidDB.putBid(new BidDAO(bid));
             int statusCode = res.getStatusCode();
             if (statusCode > 300) {
-                throw new WebApplicationException("bidDB putBid error",statusCode);
+                throw new WebApplicationException(statusCode);
             }
-
-            auction.setMinPrice(bid.getAmount());
-            CosmosItemResponse<AuctionDAO> auctionUpdatRes = auctionDB.updateAuction(auction);
-            if (auctionUpdatRes.getStatusCode() > 300) {
-                throw new WebApplicationException("auctionDB updateAuction error",statusCode);
-            }
-
-            ObjectWriter ow = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .writer()
-                .withDefaultPrettyPrinter();
-            
-            String auctionJson = ow.writeValueAsString(auction);
-            RedisCache.putAuction(auction.getId(), auctionJson);
-
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(res.getItem().toBid());
             return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
         } catch (WebApplicationException e) {
