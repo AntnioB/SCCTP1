@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotAuthorizedException;
@@ -23,6 +24,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Cookie;
@@ -32,6 +34,7 @@ import scc.cosmosDBLayers.AuctionLayer;
 import scc.cosmosDBLayers.BidLayer;
 import scc.cosmosDBLayers.QuestionLayer;
 import scc.cosmosDBLayers.UserLayer;
+import scc.data.Auction;
 import scc.data.User;
 import scc.data.database.AuctionDAO;
 import scc.data.database.BidDAO;
@@ -39,6 +42,7 @@ import scc.data.database.QuestionDAO;
 import scc.data.database.UserDAO;
 import scc.srv.Login;
 import scc.utils.Hash;
+import scc.utils.Status;
 import scc.utils.UniqueId;
 
 @Path("/user")
@@ -170,20 +174,36 @@ public class UserResource {
         }
         return res.toString();
     }
-    
+
     @GET
     @Path("/{id}/auctions")
     @Produces(MediaType.TEXT_PLAIN)
-    public String getUserAuctions(@PathParam("id") String id){
-        //did not see the need to for a user to be authenticated to make this request
+    public String getUserAuctions(@PathParam("id") String id) {
+        // did not see the need to for a user to be authenticated to make this request
 
         AuctionLayer db = AuctionLayer.getInstance();
         Iterator<AuctionDAO> ite = db.getAuctionByOwnerId(id).iterator();
         StringBuilder res = new StringBuilder();
-        while(ite.hasNext()){
+        while (ite.hasNext()) {
             res.append(ite.next().toAuction().toString() + "\n\n");
         }
         return res.toString();
+    }
+
+    @GET
+    @Path("/{id]/auctions")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserAuctionsWithStatus(@DefaultValue("*") @QueryParam("status") String status,
+            @PathParam("id") String id) {
+        AuctionLayer db = AuctionLayer.getInstance();
+        CosmosPagedIterable<AuctionDAO> res = db.getAuctionsWithStatusByOwnerId(Status.valueOf(status), id);
+        Iterator<AuctionDAO> ite = res.iterator();
+        StringBuilder sb = new StringBuilder();
+        while (ite.hasNext()) {
+            Auction a = ite.next().toAuction();
+            sb.append(a.toString() + "\n\n");
+        }
+        return Response.ok(sb.toString()).build();
     }
 
     // TODO just for testing purposes need to delete
@@ -199,7 +219,6 @@ public class UserResource {
         return "200";
     }
 
-
     private boolean userExists(String id, UserLayer db) throws JsonProcessingException {
         if (RedisCache.userExists(id))
             return true;
@@ -212,7 +231,5 @@ public class UserResource {
         }
         return user != null;
     }
-
-    
 
 }
