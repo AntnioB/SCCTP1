@@ -112,6 +112,12 @@ public class AuctionLayer {
 				new CosmosQueryRequestOptions(), AuctionDAO.class);
 	}
 
+	public CosmosPagedIterable<AuctionDAO> getAuctionsAboutToClose(){
+		init();
+		return auctions.queryItems("SELECT TOP 10 * FROM auctions WHERE auctions.status=\"" + Status.OPEN + "\" ORDER BY auctions.endTime ASC",
+				 new CosmosQueryRequestOptions(), AuctionDAO.class);
+	}
+
 	public void close() {
 		client.close();
 	}
