@@ -124,7 +124,22 @@ scenarios:
                 ownerId: "{{auctionUser}}"
                 reply: "{{ reply }}"
               ifTrue: "reply"
-          count: "{{ numQuestions }}"   
-        count: "{{ numAuctions }}"
+          count: "{{ numQuestions }}"
+          - function: "genNewAuction"
+          - put:
+              url: "/auction/{{ auctionId }}"
+              name: "PUT:/auction/*"
+              headers:
+                Content-Type: application/json
+                Accept: application/json
+              json:
+                id: "{{ auctionId }}"
+                description: "{{ description }}"
+                title: "{{ title }}"
+                ownerId: "{{ user }}"
+                photoId: "{{ imageId }}"
+                endTime: "{{ endTime }}"
+                minPrice: "{{ minimumPrice }}"
 
+        count: "{{ numAuctions }}"
 
