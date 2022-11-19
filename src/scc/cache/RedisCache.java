@@ -18,6 +18,9 @@ public class RedisCache {
 	private static final String USERS = "users";
 	private static final String AUCTIONS = "auctions";
 
+	//TO TURN OF REDIS CHANGE THIS BOOLEAN TO FALSE
+	private static boolean useRedis = true;
+
 	public synchronized static JedisPool getCachePool() {
 		if (instance != null)
 			return instance;
@@ -89,6 +92,7 @@ public class RedisCache {
 	}
 
 	public synchronized static String deleteUser(String key) {
+		if(!useRedis) return "the use of cache is off";
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			String value = jedis.hget(USERS, key);
 			jedis.hdel(USERS, key);
@@ -99,6 +103,7 @@ public class RedisCache {
 	}
 
 	public synchronized static String deleteAuction(String key) {
+		if(!useRedis) return "the use of cache is off";
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			String value = jedis.hget(AUCTIONS, key);
 			jedis.hdel(AUCTIONS, key);
@@ -109,6 +114,7 @@ public class RedisCache {
 	}
 
 	public synchronized static String putUser(String key, String value) {
+		if(!useRedis) return "the use of cache is off";
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			jedis.hset(USERS, Map.of(key, value));
 			jedis.expire(key, 1800);
@@ -119,6 +125,7 @@ public class RedisCache {
 	}
 
 	public synchronized static String putAuction(String key, String value) {
+		if(!useRedis) return "the use of cache is off";
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			jedis.hset(AUCTIONS, Map.of(key, value));
 			jedis.expire(key, 1800);
@@ -129,6 +136,7 @@ public class RedisCache {
 	}
 
 	public synchronized static boolean userExists(String key) {
+		if(!useRedis) return false;
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			return jedis.hexists(USERS, key);
 		} catch (Exception e) {
@@ -137,6 +145,7 @@ public class RedisCache {
 	}
 
 	public synchronized static boolean auctionExists(String key) {
+		if(!useRedis) return false;
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			return jedis.hexists(AUCTIONS, key);
 		} catch (Exception e) {
