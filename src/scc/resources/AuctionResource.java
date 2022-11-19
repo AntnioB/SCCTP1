@@ -163,6 +163,21 @@ public class AuctionResource {
     }
 
     @GET
+    @Path("/recent")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response auctionsAboutToClose(){
+        AuctionLayer db = AuctionLayer.getInstance();
+        CosmosPagedIterable<AuctionDAO> res = db.getAuctionsAboutToClose();
+        Iterator<AuctionDAO> ite = res.iterator();
+        StringBuilder sb = new StringBuilder();
+        while(ite.hasNext()){
+            Auction a = ite.next().toAuction();
+            sb.append(a.toString()+"\n\n");
+        }
+        return Response.ok(sb.toString()).build();
+    }
+
+    @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
     public Response searchRest(@DefaultValue("*") @QueryParam("query") String query) {
