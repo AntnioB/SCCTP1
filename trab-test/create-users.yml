@@ -41,4 +41,23 @@ scenarios:
               pwd: "{{ pwd }}"
               photoId: "{{ photoId }}"
             afterResponse: "genNewUserReply"    # capture result and store in file
+            capture:
+              - json: $.id
+                as: "userId"
+        - put:
+            url: "/user"
+            name: "PUT:/user"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+            json:
+              id: "{{ id }}"
+              name: "{{ name }}"
+              pwd: "{{ pwd }}"
+              photoId: "{{ photoId }}"
+        - get:
+            url: "/user/list"
+            name: "GET:/user/list"
+            headers:
+              Accept: "text/plain;charset=UTF-8"
         count: "{{ numUsers }}"

@@ -58,6 +58,8 @@ scenarios:
                 as: "auctionId"
               - json: $.ownerId
                 as: "auctionUser"
+#        - get:
+#            url: "/user/{{auctionId}}/"
         - loop:                          # Let's add numBids bids to the auction
           - function: "selectUserSkewed"
           - function: "genNewBid"
@@ -79,6 +81,16 @@ scenarios:
                 auctionId: "{{ auctionId }}"
                 bidderId: "{{ user }}"
                 amount: "{{ value }}"
+          - get:
+              url: "/auction/{{ auctionId }}/bid/list"
+              name: "GET:/auction/*/list"
+              headers:
+                Accept: text/plain;charset=UTF-8
+          - get:
+              url: "/auction/{{ auctionId }}/bid/highest"
+              name: "GET:/auction/*/highest"
+              headers:
+                Accept: text/plain;charset=UTF-8
           count: "{{ numBids }}"   
         - loop:                          # Let's add numQuestions questions to the auction
           - function: "selectUserSkewed"
@@ -125,21 +137,36 @@ scenarios:
                 reply: "{{ reply }}"
               ifTrue: "reply"
           count: "{{ numQuestions }}"
-          - function: "genNewAuction"
-          - put:
-              url: "/auction/{{ auctionId }}"
-              name: "PUT:/auction/*"
-              headers:
-                Content-Type: application/json
-                Accept: application/json
-              json:
-                id: "{{ auctionId }}"
-                description: "{{ description }}"
-                title: "{{ title }}"
-                ownerId: "{{ user }}"
-                photoId: "{{ imageId }}"
-                endTime: "{{ endTime }}"
-                minPrice: "{{ minimumPrice }}"
+        - function: "genNewAuction"
+        - put:
+            url: "/auction/{{ auctionId }}"
+            name: "PUT:/auction/*"
+            headers:
+              Content-Type: application/json
+              Accept: application/json
+            json:
+              id: "{{ auctionId }}"
+              description: "{{ description }}"
+              title: "{{ title }}"
+              ownerId: "{{ user }}"
+              photoId: "{{ imageId }}"
+              endTime: "{{ endTime }}"
+              minPrice: "{{ minimumPrice }}"
+          
+        - get:
+            url: "/auction/list"
+            name: "GET:/auction/list"
+            headers:
+              Accept: text/plain;charset=UTF-8
+        - get:
+            url: "auction/recent"
+            name: "Get:/auction/recent"
+            headers:
+              Accept: application/json
+        - get:
+            url: "auction/search?query=*"
+            name: "Get:/auction/search"
+            headers:
+              Accept: application/jsona
 
         count: "{{ numAuctions }}"
-
