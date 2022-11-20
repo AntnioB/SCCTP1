@@ -56,10 +56,13 @@ scenarios:
             capture:                     # Capturing auction id and store it in variable auctionId
               - json: $.id
                 as: "auctionId"
-              - json: $.ownerId
+              - json: $.ownerId          # Capturing owner id and store it in variable ownerId
                 as: "auctionUser"
-#        - get:
-#            url: "/user/{{auctionId}}/"
+        - get:
+            url: "/user/{{auctionId}}/auctions"
+            name: "GET:/user/*/auctions"
+            headers:
+              Accept: text/plain;charset=UTF-8
         - loop:                          # Let's add numBids bids to the auction
           - function: "selectUserSkewed"
           - function: "genNewBid"
@@ -81,14 +84,14 @@ scenarios:
                 auctionId: "{{ auctionId }}"
                 bidderId: "{{ user }}"
                 amount: "{{ value }}"
-          - get:
-              url: "/auction/{{ auctionId }}/bid/list"
-              name: "GET:/auction/*/list"
+          - get:                          # List bids from auction
+              url: "/auction/{{ auctionId }}/bid"
+              name: "GET:/auction/*/bid"
               headers:
                 Accept: text/plain;charset=UTF-8
           - get:
               url: "/auction/{{ auctionId }}/bid/highest"
-              name: "GET:/auction/*/highest"
+              name: "GET:/auction/*/bid/highest"
               headers:
                 Accept: text/plain;charset=UTF-8
           count: "{{ numBids }}"   
@@ -117,7 +120,7 @@ scenarios:
                 - json: $.id
                   as: "questionId"
           - function: "genNewQuestionReply"
-          - post:                         
+          - post:                          # Login as user                         
               url: "/user/auth"
               name: "POST:/user/auth"
               headers:
@@ -136,9 +139,14 @@ scenarios:
                 ownerId: "{{auctionUser}}"
                 reply: "{{ reply }}"
               ifTrue: "reply"
+          - get:                           # List Questions from auction
+              url: "/auction/{{auctionId}}/question"
+              name: "GET:/auction/*/question"
+              headers:
+                Accept: text/plain;charset=UTF-8
           count: "{{ numQuestions }}"
         - function: "genNewAuction"
-        - put:
+        - put:                              # Update auctions
             url: "/auction/{{ auctionId }}"
             name: "PUT:/auction/*"
             headers:
@@ -148,25 +156,24 @@ scenarios:
               id: "{{ auctionId }}"
               description: "{{ description }}"
               title: "{{ title }}"
-              ownerId: "{{ user }}"
+              ownerId: "{{ auctionUser }}"
               photoId: "{{ imageId }}"
               endTime: "{{ endTime }}"
               minPrice: "{{ minimumPrice }}"
-          
-        - get:
+        - get:                                # Get List of auctions
             url: "/auction/list"
             name: "GET:/auction/list"
             headers:
               Accept: text/plain;charset=UTF-8
-        - get:
-            url: "auction/recent"
-            name: "Get:/auction/recent"
+        - get:                                # Get 10 next auctions to close
+            url: "/auction/nextToClose"
+            name: "GET:/auction/nextToClose"
             headers:
               Accept: application/json
-        - get:
-            url: "auction/search?query=*"
-            name: "Get:/auction/search"
+        - get:                                # Get auctions based on some query
+            url: "/auction/search?query=*"
+            name: "GET:/auction/search"
             headers:
-              Accept: application/jsona
+              Accept: application/json
 
         count: "{{ numAuctions }}"

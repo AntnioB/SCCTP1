@@ -44,18 +44,29 @@ scenarios:
             capture:
               - json: $.id
                 as: "userId"
-        - put:
-            url: "/user"
-            name: "PUT:/user"
+              - json: $.pwd
+                as: userPwd
+        - post:                          # First: login users
+            url: "/user/auth"
+            name: "POST:/user/auth"
+            headers:
+              Content-Type: application/json
+            json:
+              id: "{{ userId }}"
+              pwd: "{{ userPwd }}"
+        - function: "genNewUser"
+        - put:                           # Update user fields
+            url: "/user/{{ userId }}"
+            name: "PUT:/user/*"
             headers:
               Content-Type: application/json
               Accept: application/json
             json:
-              id: "{{ id }}"
+              id: "{{ userId }}"
               name: "{{ name }}"
-              pwd: "{{ pwd }}"
+              pwd: "{{ userPwd }}"
               photoId: "{{ photoId }}"
-        - get:
+        - get:                           # Get user list
             url: "/user/list"
             name: "GET:/user/list"
             headers:
