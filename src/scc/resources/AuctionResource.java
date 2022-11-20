@@ -41,6 +41,7 @@ import scc.cosmosDBLayers.UserLayer;
 import scc.data.Auction;
 import scc.data.database.AuctionDAO;
 import scc.srv.MainApplication;
+import scc.utils.UniqueId;
 
 @Path("/auction")
 public class AuctionResource {
@@ -52,6 +53,7 @@ public class AuctionResource {
             throws JsonProcessingException {
 
         try {
+            auction.setId(UniqueId.auctionId());
             NewCookie cookie = RedisCache.checkCookieUser(session, auction.getOwnerId());
             ObjectMapper om = new ObjectMapper()
                     .registerModule(new JavaTimeModule());
@@ -100,27 +102,24 @@ public class AuctionResource {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateAuction(@CookieParam("scc:session") Cookie session, Auction auction)
+    public Response updateAuction(@CookieParam("scc:session") Cookie session, Auction auction,
+            @PathParam("id") String id)
             throws JsonProcessingException {
 
-        try {
-            NewCookie cookie = RedisCache.checkCookieUser(session, auction.getOwnerId());
-            AuctionLayer db = AuctionLayer.getInstance();
-            if (!auctionExists(auction.getId(), db))
-                throw new WebApplicationException("Auction not found", 404);
-            CosmosItemResponse<AuctionDAO> res = db.updateAuction(new AuctionDAO(auction));
-            int statusCode = res.getStatusCode();
-            if (statusCode > 300)
-                throw new WebApplicationException(statusCode);
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(res.getItem());
-            RedisCache.putAuction(auction.getId(), json);
-            return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e);
-        }
+        auction.setId(id);
+        NewCookie cookie = RedisCache.checkCookieUser(session, auction.getOwnerId());
+        AuctionLayer db = AuctionLayer.getInstance();
+        if (!auctionExists(auction.getId(), db))
+            throw new WebApplicationException("Auction not found", 404);
+        CosmosItemResponse<AuctionDAO> res = db.updateAuction(new AuctionDAO(auction));
+        int statusCode = res.getStatusCode();
+        if (statusCode > 300)
+            throw new WebApplicationException(statusCode);
+        ObjectWriter ow = new ObjectMapper().registerModule(new JavaTimeModule()).writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(res.getItem().toAuction());
+        RedisCache.putAuction(auction.getId(), json);
+        return Response.ok(json, MediaType.APPLICATION_JSON).cookie(cookie).build();
+
     }
 
     @GET
@@ -136,43 +135,31 @@ public class AuctionResource {
         return res.toString();
     }
 
-    // TODO just for testing purposes need to delete
-    @DELETE
-    @Path("/delete")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String deleteAll() {
-        AuctionLayer db = AuctionLayer.getInstance();
-        Iterator<AuctionDAO> ite = db.getAuctions().iterator();
-        while (ite.hasNext()) {
-            db.delAuction(ite.next());
-        }
-        return "200";
-    }
-
     private boolean auctionExists(String id, AuctionLayer db) throws JsonProcessingException {
         if (RedisCache.auctionExists(id))
             return true;
         CosmosPagedIterable<AuctionDAO> res = db.getAuctionById(id);
-        AuctionDAO auction = res.iterator().next();
-        if (auction != null) {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(auction.toAuction());
+        Iterator<AuctionDAO> it = res.iterator();
+        if (it.hasNext()) {
+            ObjectWriter ow = new ObjectMapper().registerModule(new JavaTimeModule()).writer().withDefaultPrettyPrinter();
+            String json = ow.writeValueAsString(it.next().toAuction());
             RedisCache.putAuction(id, json);
+            return true;
         }
-        return auction != null;
+        return false;
     }
 
     @GET
-    @Path("/recent")
+    @Path("/nextToClose")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response auctionsAboutToClose(){
+    public Response auctionsAboutToClose() {
         AuctionLayer db = AuctionLayer.getInstance();
         CosmosPagedIterable<AuctionDAO> res = db.getAuctionsAboutToClose();
         Iterator<AuctionDAO> ite = res.iterator();
         StringBuilder sb = new StringBuilder();
-        while(ite.hasNext()){
+        while (ite.hasNext()) {
             Auction a = ite.next().toAuction();
-            sb.append(a.toString()+"\n\n");
+            sb.append(a.toString() + "\n\n");
         }
         return Response.ok(sb.toString()).build();
     }
