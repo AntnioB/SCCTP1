@@ -86,10 +86,10 @@ scenarios:
                 amount: "{{ value }}"
           - get:                          # List bids from auction
               url: "/auction/{{ auctionId }}/bid"
-              name: "GET:/auction/*/bid"
+              name: "GET:/auction/*/bid"  
               headers:
                 Accept: text/plain;charset=UTF-8
-          - get:
+          - get:                          # Get the highest bid of an auction
               url: "/auction/{{ auctionId }}/bid/highest"
               name: "GET:/auction/*/bid/highest"
               headers:
